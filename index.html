@@ -108,8 +108,8 @@
 
         .metrics-card {
             display: flex;
-            justify-content: space-around;
-            align-items: center;
+            justify-content: space-between; /* Change from space-around to space-between */
+            gap: 10px; /* Add gap for better spacing control */
             margin-bottom: 20px;
         }
 
@@ -119,6 +119,8 @@
             border-radius: 8px;
             background-color: white;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            flex: 1; /* Make each item take equal space */
+            min-width: 0; /* Allow flex items to shrink below content size */
         }
 
         .metric-title {
