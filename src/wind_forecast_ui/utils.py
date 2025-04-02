@@ -11,7 +11,7 @@ def download_hf_file(filename: str, repo_id: str, repo_type: str = "dataset") ->
     return file
 
 
-def download_dataframe() -> pl.DataFrame:
+def download_forecast_dataframe() -> pl.DataFrame:
     file = download_hf_file("wind-forecasts.parquet", "rexsovietskiy/wind-forecast", "dataset")
     df = pl.read_parquet(file)
     return df
