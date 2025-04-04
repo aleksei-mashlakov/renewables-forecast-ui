@@ -21,7 +21,7 @@ def load_json(filename: str) -> dict:
     """Load the JSON file from the local filesystem."""
     with open(filename) as f:
         data = json.loads(f.read())
-    return data
+    return data  # type: ignore[no-any-return]
 
 
 def save_json(filename: str, data: dict) -> None:

@@ -28,7 +28,7 @@ def update_realtime_data(filepath: str) -> None:
 def update_forecast_file(filepath: str) -> None:
     """Update the forecast file with new data."""
     start, end = next_day_start_end("CET")
-    next_day_forecast = json.loads(
+    next_day_forecast = (
         download_forecast_dataframe()
         .rename({"valid_time": "datetime", "q10": "ci_lower", "q50": "forecast", "q90": "ci_upper"})
         .filter(pl.col("datetime").is_between(start, end, closed="left"))
@@ -36,7 +36,6 @@ def update_forecast_file(filepath: str) -> None:
         .with_columns(pl.col("datetime").dt.strftime("%Y-%m-%dT%H:%M:%SZ"))
         .select(["datetime", "ci_lower", "forecast", "ci_upper"])
     )
-    logger.info(next_day_forecast)
 
     data = load_json(filepath)
     historical_forecasts = pl.DataFrame(data["data"]).sort("datetime")
@@ -48,7 +47,6 @@ def update_forecast_file(filepath: str) -> None:
     )
 
     save_json(filepath, data)
-    logger.info(data)
     logger.info(f"Forecast data successfully written to {filepath}.")
 
 
@@ -80,6 +78,7 @@ def update_benchmark_file(filepath: str) -> None:
     )
 
     save_json(filepath, data)
+    logger.info(f"Benchmark forecast data successfully written to {filepath}.")
 
 
 def update_history_benchmark_file(actual_filepath: str, forecast_filepath: str) -> None:
@@ -114,6 +113,7 @@ def update_history_benchmark_file(actual_filepath: str, forecast_filepath: str) 
     )
 
     save_json(forecast_filepath, data)
+    logger.info(f"Forecast data successfully written to {forecast_filepath}.")
 
     # Update the last day value
     last_day_value = last_day_benchmark.select(["datetime", "value"]).drop_nulls()
@@ -128,3 +128,4 @@ def update_history_benchmark_file(actual_filepath: str, forecast_filepath: str) 
     )
 
     save_json(actual_filepath, data)
+    logger.info(f"Actual data successfully written to {actual_filepath}.")
