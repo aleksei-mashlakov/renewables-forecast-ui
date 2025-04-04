@@ -1,3 +1,5 @@
+SRC = src
+
 .PHONY: install
 install: ## Install the virtual environment and install the pre-commit hooks
 	@echo "🚀 Creating virtual environment using uv"
@@ -32,6 +34,13 @@ clean-build: ## Clean build artifacts
 add-kernel: ## Add the kernel to Jupyter
 	@echo "🚀 Adding kernel to Jupyter"
 	@uv run python -m ipykernel install --user --name $(shell basename $(shell pwd)) --display-name "$(shell basename $(shell pwd))"
+
+.PHONY: ruff
+ruff: ## Run ruff
+	@echo "🚀 Running ruff"
+	@uv run ruff check .
+	@echo "🚀 Running ruff with autofix"
+	@uv run ruff format --check --fix .
 
 .PHONY: help
 help:
