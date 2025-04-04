@@ -239,11 +239,13 @@
         </div>
 
         <div class="footer">
-            © Copyright 2024 Aleksei Mashlakov. Hosted by GitHub Pages.
+            © Copyright <span id="currentYear"></span> Aleksei Mashlakov. Hosted by GitHub Pages.
         </div>
     </div>
 
     <script>
+        // Define the current year
+        document.getElementById('currentYear').textContent = new Date().getFullYear();
         // Define wind farms data
         const windFarmsData = [
             {name: "Mermaid", latitude: 51.72129, longitude: 2.73560, capacity: 237},
