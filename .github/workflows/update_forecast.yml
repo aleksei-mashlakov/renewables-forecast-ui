@@ -25,27 +25,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install uv
-        uses: astral-sh/setup-uv@v5
-        with:
-          # Install a specific version of uv.
-          version: "0.6.2"
-          enable-cache: true
-          cache-dependency-glob: "uv.lock"
-
-      - name: "Set up Python"
-        uses: actions/setup-python@v5
-        with:
-          python-version-file: "pyproject.toml"
-
-      - name: Install the project
-        run: uv sync
+      - name: Set up the environment
+        uses: ./.github/actions/setup-python-env
 
       - name: Update forecast data
         run: uv run python -m src.wind_forecast_ui --update forecast
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
-          DAY_OF_WEEK: Monday
 
       - name: Commit and push any changes
         run: |-
