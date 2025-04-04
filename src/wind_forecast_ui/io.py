@@ -96,6 +96,7 @@ def update_history_benchmark_file(actual_filepath: str, forecast_filepath: str) 
         .filter(pl.col("datetime").is_between(start, end, closed="left"))
         .sort("datetime")
         .with_columns(pl.col("datetime").dt.strftime("%Y-%m-%dT%H:%M:%SZ"))
+        .select(["datetime", "ci_lower", "forecast", "ci_upper"])
     )
 
     # update the last day forecast
