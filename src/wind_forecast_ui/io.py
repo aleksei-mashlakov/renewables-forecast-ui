@@ -17,6 +17,7 @@ def update_realtime_data(filepath: str) -> None:
         .sort("datetime")
         .with_columns(pl.col("datetime").dt.strftime("%Y-%m-%dT%H:%M:%SZ"))
         .select(["datetime", "value"])
+        .drop_nulls()
     )
 
     data["data"] = json.loads(
