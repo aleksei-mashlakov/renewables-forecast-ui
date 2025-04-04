@@ -28,6 +28,11 @@ clean-build: ## Clean build artifacts
 	@echo "🚀 Removing build artifacts"
 	@uv run python -c "import shutil; import os; shutil.rmtree('dist') if os.path.exists('dist') else None"
 
+.PHONY: add-kernel
+add-kernel: ## Add the kernel to Jupyter
+	@echo "🚀 Adding kernel to Jupyter"
+	@uv run python -m ipykernel install --user --name $(shell basename $(shell pwd)) --display-name "$(shell basename $(shell pwd))"
+
 .PHONY: help
 help:
 	@uv run python -c "import re; \
