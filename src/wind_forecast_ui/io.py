@@ -39,11 +39,12 @@ def update_forecast_file(filepath: str) -> None:
     )
 
     data = load_json(filepath)
-    historical_forecasts = pl.DataFrame(data["data"]).sort("datetime")
+    historical_forecasts = pl.DataFrame(data["data"]).select(["datetime", "ci_lower", "forecast", "ci_upper"])
 
     data["data"] = json.loads(
         pl.concat([historical_forecasts, next_day_forecast], how="vertical")
         .unique("datetime", keep="last")
+        .sort("datetime")
         .write_json()
     )
 
@@ -69,7 +70,7 @@ def update_benchmark_file(filepath: str) -> None:
     )
 
     data = load_json(filepath)
-    historical_benchmark_forecasts = pl.DataFrame(data["data"])
+    historical_benchmark_forecasts = pl.DataFrame(data["data"]).select(["datetime", "ci_lower", "forecast", "ci_upper"])
 
     data["data"] = json.loads(
         pl.concat([historical_benchmark_forecasts, next_day_benchmark], how="vertical")
