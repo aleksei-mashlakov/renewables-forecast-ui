@@ -1,4 +1,4 @@
-name: Main
+name: main
 
 on:
   push:
@@ -21,6 +21,9 @@ jobs:
 
       - name: Set up the environment
         uses: ./.github/actions/setup-python-env
+
+      # - name: Run pre-commit
+      #   run: pre-commit run --all-files
 
       - name: Run checks
         run: make check
