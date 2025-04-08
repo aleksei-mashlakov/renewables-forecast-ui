@@ -22,9 +22,6 @@ jobs:
       - name: Set up the environment
         uses: ./.github/actions/setup-python-env
 
-      - name: Run pre-commit
-        run: uv run pre-commit run pretty-format-json
-
       - name: Run checks
         run: make check
 
