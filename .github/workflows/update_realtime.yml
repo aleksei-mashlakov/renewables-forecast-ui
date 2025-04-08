@@ -1,5 +1,5 @@
 # You can name this whatever you want
-name: update
+name: update realtime
 
 # You will get an error on the automatic updates committing
 # if you do not have this line
@@ -13,7 +13,7 @@ permissions:
 # schedule and cron make it run at certain frequencies
 on:
   schedule:
-    - cron: "0 */4 * * *"
+    - cron: "0 */1 * * *"
   workflow_dispatch:
 
 
