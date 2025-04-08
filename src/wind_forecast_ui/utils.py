@@ -27,4 +27,4 @@ def load_json(filename: str) -> dict:
 def save_json(filename: str, data: dict) -> None:
     """Save the JSON data to the local filesystem."""
     with open(filename, "w") as f:
-        json.dump(data, f, indent=4)
+        json.dump(data, f, indent=2)
