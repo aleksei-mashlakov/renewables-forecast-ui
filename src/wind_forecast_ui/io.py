@@ -1,3 +1,4 @@
+import datetime
 import json
 
 import polars as pl
@@ -47,6 +48,7 @@ def update_forecast_file(filepath: str) -> None:
         .sort("datetime")
         .write_json()
     )
+    data["metadata"]["last_update"] = datetime.datetime.now(datetime.UTC).strftime("%Y-%m-%dT%H:%M:%SZ")
 
     save_json(filepath, data)
     logger.info(f"Forecast data successfully written to {filepath}.")
