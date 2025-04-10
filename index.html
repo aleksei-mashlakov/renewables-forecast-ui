@@ -244,6 +244,11 @@
     </div>
 
     <script>
+        // Global variables to store data
+        let globalForecastData = null;
+        let globalActualData = null;
+        let globalBenchmarkData = null;
+
         // Define the current year
         document.getElementById('currentYear').textContent = new Date().getFullYear();
         // Define wind farms data
@@ -274,6 +279,11 @@
                 const forecastData = await forecastResponse.json();
                 const actualData = await actualResponse.json();
                 const benchmarkData = await benchmarkResponse.json();
+
+                // Store data globally
+                globalForecastData = forecastData;
+                globalActualData = actualData;
+                globalBenchmarkData = benchmarkData;
 
                 return {
                     forecast: forecastData,
@@ -353,18 +363,32 @@
             return scores.reduce((sum, score) => sum + score, 0) / scores.length;
         }
 
-        // Function to update metrics display
-        function updateMetricsDisplay(data) {
-            const forecastData = data.forecast.data;
-            const actualData = data.actual.data;
-            const benchmarkData = data.benchmark.data;
+        // Function to filter data by date range
+        function filterDataByDateRange(data, startDate, endDate) {
+            return data.filter(point => {
+                const pointDate = new Date(point.datetime);
+                return pointDate >= startDate && pointDate <= endDate;
+            });
+        }
 
-            // Calculate metrics
-            const rmse = calculateRMSE(forecastData, actualData);
-            const wis = calculateWinklerIntervalScore(forecastData, actualData);
+        // Function to update metrics display based on date range
+        function updateMetricsDisplayForDateRange(startDate, endDate) {
+            if (!globalForecastData || !globalActualData || !globalBenchmarkData) {
+                console.error("Global data not available");
+                return;
+            }
 
-            const benchmarkRMSE = calculateRMSE(benchmarkData, actualData);
-            const benchmarkWIS = calculateWinklerIntervalScore(benchmarkData, actualData);
+            // Filter data to the current view range
+            const filteredForecast = filterDataByDateRange(globalForecastData.data, startDate, endDate);
+            const filteredActual = filterDataByDateRange(globalActualData.data, startDate, endDate);
+            const filteredBenchmark = filterDataByDateRange(globalBenchmarkData.data, startDate, endDate);
+
+            // Calculate metrics for filtered data
+            const rmse = calculateRMSE(filteredForecast, filteredActual);
+            const wis = calculateWinklerIntervalScore(filteredForecast, filteredActual);
+
+            const benchmarkRMSE = calculateRMSE(filteredBenchmark, filteredActual);
+            const benchmarkWIS = calculateWinklerIntervalScore(filteredBenchmark, filteredActual);
 
             // Update RMSE display
             if (rmse !== null && benchmarkRMSE !== null) {
@@ -405,12 +429,21 @@
             }
         }
 
-        // Function to get next update time (10:00 CET next day)
+        // Initial update of metrics display with all data
+        function updateMetricsDisplay(data) {
+            const now = new Date();
+            const oneMonthAgo = getOneMonthAgoDate();
+
+            // Update metrics with default date range (last month)
+            updateMetricsDisplayForDateRange(oneMonthAgo, now);
+        }
+
+        // Function to get next update time (11:00 CET next day)
         function getNextUpdateTime() {
             const now = new Date();
             const tomorrow = new Date(now);
             tomorrow.setDate(tomorrow.getDate() + 1);
-            tomorrow.setHours(10, 0, 0, 0); // 10:00 CET
+            tomorrow.setHours(11, 0, 0, 0); // 11:00 CET
 
             return tomorrow;
         }
@@ -433,12 +466,16 @@
             return oneMonthAgo;
         }
 
-        // Function to create the Plotly chart
+        // Function to create the Plotly chart and set up event listeners
         function createChart(data) {
             const forecastData = data.forecast.data;
             const actualData = data.actual.data;
             const benchmarkData = data.benchmark.data;
             const metadata = data.forecast.metadata;
+
+            // Extract dates from metadata
+            const lastUpdateDate = metadata.last_update ? new Date(metadata.last_update) : null;
+            const lastFitDate = metadata.last_fit ? new Date(metadata.last_fitting) : null;
 
             // Get maximum y-value for vertical line height
             const allYValues = [
@@ -453,10 +490,18 @@
                 `${Math.round(forecastData[forecastData.length-1].forecast)}<span class="forecast-unit">${metadata.units || 'MW'}</span>`;
 
             // Update last update time with new format
-            const lastDate = new Date(forecastData[forecastData.length-1].datetime);
+            let lastUpdateText = "Unknown";
+            if (lastUpdateDate) {
+                lastUpdateText = formatDate(lastUpdateDate);
+            } else {
+                // Fallback to using the last forecast point date if metadata is missing
+                const lastDate = new Date(forecastData[forecastData.length-1].datetime);
+                lastUpdateText = formatDate(lastDate);
+            }
+
             const nextUpdate = getNextUpdateTime();
             document.getElementById('last-update-time').textContent =
-                `Next update: ${formatNextUpdateTime(nextUpdate)} · Last updated: ${formatDate(lastDate)}`;
+                `Next update: ${formatNextUpdateTime(nextUpdate)} · Last updated: ${lastUpdateText}`;
 
             // Create the chart traces for forecast data
             const traces = [
@@ -578,6 +623,22 @@
                 showlegend: false
             });
 
+            if (lastFitDate) {
+                traces.push({
+                    x: [lastFitDate, lastFitDate],
+                    y: [0, maxY],
+                    type: 'scatter',
+                    mode: 'lines',
+                    name: 'Last Fitted',
+                    line: {
+                        color: '#808f9c', // Orange color to differentiate
+                        width: 1,
+                        dash: 'dash'
+                    },
+                    showlegend: false
+                });
+            }
+
             // Get date range for setting default range slider values
             const oneMonthAgo = getOneMonthAgoDate();
 
@@ -654,9 +715,55 @@
                         yanchor: 'top'
                     }
                 ]
-            };
 
+            };
+            // Add annotation for last fitting date if available
+            if (lastFitDate) {
+                layout.annotations.push({
+                    x: lastFitDate,
+                    y: maxY * 0.75, // Position below the other annotations
+                    xref: 'x',
+                    yref: 'y',
+                    text: 'Last Fit',
+                    showarrow: false,
+                    font: {
+                        family: 'Montserrat, sans-serif',
+                        size: 12,
+                        color: '#FFA500'
+                    },
+                    bgcolor: 'rgba(255, 255, 255, 0.8)',
+                    bordercolor: '#FFA500',
+                    borderwidth: 1,
+                    borderpad: 4,
+                    yanchor: 'top'
+                });
+            }
+
+
+
+            // Create the plot
             Plotly.newPlot('forecast-chart', traces, layout);
+
+            // Add event listener for relayout event (triggered when range slider changes)
+            document.getElementById('forecast-chart').on('plotly_relayout', function(eventdata) {
+                // Check if range has changed
+                if (eventdata['xaxis.range[0]'] !== undefined && eventdata['xaxis.range[1]'] !== undefined) {
+                    const startDate = new Date(eventdata['xaxis.range[0]']);
+                    const endDate = new Date(eventdata['xaxis.range[1]']);
+
+                    // Update metrics based on new date range
+                    updateMetricsDisplayForDateRange(startDate, endDate);
+                }
+                // Also handle range slider changes
+                else if (eventdata['xaxis.range'] !== undefined) {
+                    const [startStr, endStr] = eventdata['xaxis.range'];
+                    const startDate = new Date(startStr);
+                    const endDate = new Date(endStr);
+
+                    // Update metrics based on new date range
+                    updateMetricsDisplayForDateRange(startDate, endDate);
+                }
+            });
 
             // Add toggle button functionality
             const toggleButton = document.getElementById('toggle-benchmark');
