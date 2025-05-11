@@ -15,7 +15,8 @@ def main(args: dict) -> None:
             update_forecast_file("./data/forecast.json")
             update_benchmark_file("./data/benchmark.json")
             update_history_benchmark_file(
-                actual_filepath="./data/actual.json", forecast_filepath="./data/benchmark.json"
+                actual_filepath="./data/actual.json",
+                forecast_filepath="./data/benchmark.json",
             )
 
         case "realtime":
