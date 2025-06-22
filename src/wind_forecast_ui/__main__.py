@@ -1,26 +1,26 @@
 import argparse
 
-from wind_forecast_ui.io import (
-    update_benchmark_file,
-    update_forecast_file,
-    update_history_benchmark_file,
-    update_realtime_data,
-)
+from loguru import logger
+
+from wind_forecast_ui.io import ForecastConfig, IODataManager
 
 
 def main(args: dict) -> None:
     """Main function to update the forecast file."""
-    match args["update"]:
-        case "forecast":
-            update_forecast_file("./data/forecast.json")
-            update_benchmark_file("./data/benchmark.json")
-            update_history_benchmark_file(
-                actual_filepath="./data/actual.json",
-                forecast_filepath="./data/benchmark.json",
-            )
+    for io_manager in [IODataManager(ForecastConfig.WIND), IODataManager(ForecastConfig.SOLAR)]:
+        try:
+            match args["update"]:
+                case "forecast":
+                    io_manager.update_forecast_file()
+                    io_manager.update_benchmark_file()
+                    io_manager.update_history_benchmark_file()
 
-        case "realtime":
-            update_realtime_data("./data/actual.json")
+                case "realtime":
+                    io_manager.update_realtime_data()
+        except Exception as e:
+            logger.error(f"Error updating {io_manager._frcst_config.namespace} data: {e}")
+            continue
+    logger.info("Update completed.")
 
 
 if __name__ == "__main__":

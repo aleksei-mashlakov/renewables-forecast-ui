@@ -11,20 +11,22 @@ def download_hf_file(filename: str, repo_id: str, repo_type: str = "dataset") ->
     return file
 
 
-def download_forecast_dataframe() -> pl.DataFrame:
-    file = download_hf_file("wind-forecasts.parquet", "rexsovietskiy/wind-forecast", "dataset")
+def download_forecast_dataframe(filename: str = "wind-forecasts.parquet") -> pl.DataFrame:
+    file = download_hf_file(filename, "rexsovietskiy/wind-forecast", "dataset")
     df = pl.read_parquet(file)
     return df
 
 
-def load_json(filename: str) -> dict:
-    """Load the JSON file from the local filesystem."""
-    with open(filename) as f:
-        data = json.loads(f.read())
-    return data  # type: ignore[no-any-return]
+class JSONUtils:
+    @staticmethod
+    def load_json(filename: str) -> dict:
+        """Load the JSON file from the local filesystem."""
+        with open(filename) as f:
+            data = json.loads(f.read())
+        return data  # type: ignore[no-any-return]
 
-
-def save_json(filename: str, data: dict) -> None:
-    """Save the JSON data to the local filesystem."""
-    with open(filename, "w") as f:
-        json.dump(data, f, indent=2)
+    @staticmethod
+    def save_json(filename: str, data: dict) -> None:
+        """Save the JSON data to the local filesystem."""
+        with open(filename, "w") as f:
+            json.dump(data, f, indent=2)
