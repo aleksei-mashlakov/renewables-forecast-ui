@@ -52,6 +52,12 @@ def realtime_url(dataset: EliaDataset) -> str:
                 "exports/json?limit=-1&timezone=UTC&refine=offshoreonshore%3A%22Offshore%22"
                 "&select=datetime,realtime,dayahead11hforecast,dayahead11hconfidence10,dayahead11hconfidence90,monitoredcapacity,loadfactor,decrementalbidid"
             )
+        case EliaDataset.SOLAR_REALTIME:
+            return (
+                f"https://opendata.elia.be/api/explore/v2.1/catalog/datasets/{EliaDataset.SOLAR_REALTIME.value[0]}/"
+                "exports/json?limit=-1&timezone=UTC&refine=region%3A%22Belgium%22"
+                "&select=datetime,realtime,dayahead11hforecast,dayahead11hconfidence10,dayahead11hconfidence90,monitoredcapacity,loadfactor"
+            )
         case _:
             raise ValueError(f"Unsupported dataset: {dataset}")
 
