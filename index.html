@@ -268,9 +268,9 @@
         async function initializeData() {
             try {
                 // Try to fetch data from files
-                const forecastResponse = await fetch('./data/forecast.json');
-                const actualResponse = await fetch('./data/actual.json');
-                const benchmarkResponse = await fetch('./data/benchmark.json');
+                const forecastResponse = await fetch('./data/wind/forecast.json');
+                const actualResponse = await fetch('./data/wind/actual.json');
+                const benchmarkResponse = await fetch('./data/wind/benchmark.json');
 
                 if (!forecastResponse.ok || !actualResponse.ok || !benchmarkResponse.ok) {
                     throw new Error("Could not load data files");
