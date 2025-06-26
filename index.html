@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Offshore Wind Power Forecast</title>
+    <title>Renewable Energy Forecast</title>
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/leaflet.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/leaflet.min.css">
@@ -12,6 +12,7 @@
         :root {
             --primary-color: #1a73e8;
             --secondary-color: #e91e63;
+            --solar-color: #ff9800;
             --background-color: #f8f9fa;
             --text-color: #202124;
             --text-secondary: #5f6368;
@@ -94,12 +95,11 @@
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
             padding: 20px;
             margin-bottom: 24px;
-            /* Increased height to ensure map fits properly */
             height: 500px;
             overflow: hidden;
         }
 
-        #wind-farm-map {
+        #wind-farm-map, #solar-plant-map {
             width: 100%;
             height: 100%;
             border-radius: 4px;
@@ -108,8 +108,8 @@
 
         .metrics-card {
             display: flex;
-            justify-content: space-between; /* Change from space-around to space-between */
-            gap: 10px; /* Add gap for better spacing control */
+            justify-content: space-between;
+            gap: 10px;
             margin-bottom: 20px;
         }
 
@@ -119,8 +119,8 @@
             border-radius: 8px;
             background-color: white;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-            flex: 1; /* Make each item take equal space */
-            min-width: 0; /* Allow flex items to shrink below content size */
+            flex: 1;
+            min-width: 0;
         }
 
         .metric-title {
@@ -197,45 +197,136 @@
             justify-content: center;
             margin-top: 10px;
         }
+
+        .tabs {
+            display: flex;
+            margin-bottom: 20px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .tab {
+            padding: 12px 24px;
+            cursor: pointer;
+            font-weight: 500;
+            color: var(--text-secondary);
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+        }
+
+        .tab:hover {
+            color: var(--primary-color);
+        }
+
+        .tab.active {
+            color: var(--primary-color);
+            border-bottom: 3px solid var(--primary-color);
+        }
+
+        .tab.active[data-source="solar"] {
+            color: var(--solar-color);
+            border-bottom: 3px solid var(--solar-color);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .solar-accent {
+            color: var(--solar-color);
+        }
+
+        .wind-accent {
+            color: var(--secondary-color);
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1 class="title">Offshore wind forecast 🇧🇪</h1>
-        <p class="subtitle">Offshore Forecast (15-min resolution)</p>
+        <h1 class="title">Renewable Energy Forecast 🇧🇪</h1>
+        <p class="subtitle">15-minute resolution forecasts</p>
 
-        <!-- Metrics Container -->
-        <div class="metrics-card">
-            <div class="metric-item">
-                <p class="metric-title">RMSE vs Actual</p>
-                <p class="metric-value" id="rmse-value">-</p>
-                <p class="metric-change" id="rmse-change">-</p>
+        <!-- Tabs Navigation -->
+        <div class="tabs">
+            <div class="tab active" data-target="wind-tab" data-source="wind">Offshore Wind Forecast 💨</div>
+            <div class="tab" data-target="solar-tab" data-source="solar">Solar PV Forecast ☀️</div>
+        </div>
+
+        <!-- Wind Tab Content -->
+        <div id="wind-tab" class="tab-content active">
+            <!-- Metrics Container -->
+            <div class="metrics-card">
+                <div class="metric-item">
+                    <p class="metric-title">RMSE vs Actual</p>
+                    <p class="metric-value" id="wind-rmse-value">-</p>
+                    <p class="metric-change" id="wind-rmse-change">-</p>
+                </div>
+                <div class="metric-item">
+                    <p class="metric-title">Winkler Interval Score (α=0.2)</p>
+                    <p class="metric-value" id="wind-wis-value">-</p>
+                    <p class="metric-change" id="wind-wis-change">-</p>
+                </div>
             </div>
-            <div class="metric-item">
-                <p class="metric-title">Winkler Interval Score (α=0.2)</p>
-                <p class="metric-value" id="wis-value">-</p>
-                <p class="metric-change" id="wis-change">-</p>
+
+            <div class="card">
+                <h2 class="forecast-value" id="wind-forecast-value">0<span class="forecast-unit">MW</span></h2>
+                <p class="info-text" id="wind-last-update-time">
+                    Next update: Loading... · Last updated: Loading...
+                </p>
+            </div>
+
+            <div class="chart-container">
+                <h3>Offshore Wind Power Forecast</h3>
+                <div id="wind-forecast-chart" class="chart"></div>
+                <div class="button-container">
+                    <button id="wind-toggle-benchmark" class="toggle-benchmark">Show Benchmark Data</button>
+                </div>
+            </div>
+
+            <div class="map-container">
+                <h3>Belgian Offshore Wind Farms (2262 MW Total Capacity)</h3>
+                <div id="wind-farm-map"></div>
             </div>
         </div>
 
-        <div class="card">
-            <h2 class="forecast-value" id="forecast-value">0<span class="forecast-unit">MW</span></h2>
-            <p class="info-text" id="last-update-time">
-                Next update: Loading... · Last updated: Loading...
-            </p>
-        </div>
-
-        <div class="chart-container">
-            <h3>Offshore Wind Power Forecast</h3>
-            <div id="forecast-chart" class="chart"></div>
-            <div class="button-container">
-                <button id="toggle-benchmark" class="toggle-benchmark">Show Benchmark Data</button>
+        <!-- Solar Tab Content -->
+        <div id="solar-tab" class="tab-content">
+            <!-- Metrics Container -->
+            <div class="metrics-card">
+                <div class="metric-item">
+                    <p class="metric-title">RMSE vs Actual</p>
+                    <p class="metric-value" id="solar-rmse-value">-</p>
+                    <p class="metric-change" id="solar-rmse-change">-</p>
+                </div>
+                <div class="metric-item">
+                    <p class="metric-title">Winkler Interval Score (α=0.2)</p>
+                    <p class="metric-value" id="solar-wis-value">-</p>
+                    <p class="metric-change" id="solar-wis-change">-</p>
+                </div>
             </div>
-        </div>
 
-        <div class="map-container">
-            <h3>Belgian Offshore Wind Farms (2264.2 MW Total Capacity)</h3>
-            <div id="wind-farm-map"></div>
+            <div class="card">
+                <h2 class="forecast-value" id="solar-forecast-value">0<span class="forecast-unit">MW</span></h2>
+                <p class="info-text" id="solar-last-update-time">
+                    Next update: Loading... · Last updated: Loading...
+                </p>
+            </div>
+
+            <div class="chart-container">
+                <h3>Solar PV Power Forecast</h3>
+                <div id="solar-forecast-chart" class="chart"></div>
+                <div class="button-container">
+                    <button id="solar-toggle-benchmark" class="toggle-benchmark">Show Benchmark Data</button>
+                </div>
+            </div>
+
+            <div class="map-container">
+                <h3>Belgian Solar PV Plants (11217 MW Total Capacity)</h3>
+                <div id="solar-plant-map"></div>
+            </div>
         </div>
 
         <div class="footer">
@@ -244,13 +335,18 @@
     </div>
 
     <script>
-        // Global variables to store data
-        let globalForecastData = null;
-        let globalActualData = null;
-        let globalBenchmarkData = null;
-
         // Define the current year
         document.getElementById('currentYear').textContent = new Date().getFullYear();
+        
+        // Initialize maps and data containers
+        let windMap = null;
+        let solarMap = null;
+        let windData = null;
+        let solarData = null;
+        let currentTab = 'wind';
+        let windBenchmarkVisible = false;
+        let solarBenchmarkVisible = false;
+
         // Define wind farms data
         const windFarmsData = [
             {name: "Mermaid", latitude: 51.72129, longitude: 2.73560, capacity: 237},
@@ -264,10 +360,380 @@
             {name: "Norther", latitude: 51.5239, longitude: 3.0072, capacity: 370}
         ];
 
+        // Define solar plants data
+        const solarPlantsData = [
+            {'name': 110010, 'latitude': 51.13, 'longitude': 4.38, 'capacity': 12.527},
+            {'name': 110020, 'latitude': 51.23, 'longitude': 4.43, 'capacity': 251.623},
+            {'name': 110021, 'latitude': 51.23, 'longitude': 4.43, 'capacity': 8.946},
+            {'name': 110090, 'latitude': 51.35, 'longitude': 4.64, 'capacity': 53.282},
+            {'name': 110220, 'latitude': 51.4, 'longitude': 4.46, 'capacity': 48.243},
+            {'name': 110240, 'latitude': 51.13, 'longitude': 4.44, 'capacity': 40.996},
+            {'name': 110290, 'latitude': 51.17, 'longitude': 4.47, 'capacity': 38.428},
+            {'name': 110291, 'latitude': 51.17, 'longitude': 4.47, 'capacity': 5.66},
+            {'name': 110350, 'latitude': 51.19, 'longitude': 4.56, 'capacity': 36.755},
+            {'name': 110380, 'latitude': 51.13, 'longitude': 4.35, 'capacity': 42.562},
+            {'name': 110400, 'latitude': 51.27, 'longitude': 4.51, 'capacity': 7.078},
+            {'name': 110520, 'latitude': 51.2, 'longitude': 4.52, 'capacity': 37.377},
+            {'name': 110560, 'latitude': 51.22, 'longitude': 4.33, 'capacity': 37.632},
+            {'name': 110570, 'latitude': 51.3, 'longitude': 4.72, 'capacity': 43.397},
+            {'name': 120070, 'latitude': 51.1, 'longitude': 4.23, 'capacity': 42.769},
+            {'name': 120090, 'latitude': 51.1, 'longitude': 4.53, 'capacity': 26.27},
+            {'name': 120140, 'latitude': 51.08, 'longitude': 4.73, 'capacity': 84.359},
+            {'name': 120210, 'latitude': 51.13, 'longitude': 4.57, 'capacity': 44.65},
+            {'name': 120250, 'latitude': 51.03, 'longitude': 4.48, 'capacity': 112.797},
+            {'name': 120251, 'latitude': 51.03, 'longitude': 4.48, 'capacity': 2.57},
+            {'name': 120260, 'latitude': 51.16, 'longitude': 4.67, 'capacity': 30.888},
+            {'name': 120290, 'latitude': 51.06, 'longitude': 4.63, 'capacity': 47.225},
+            {'name': 120300, 'latitude': 51.08, 'longitude': 4.28, 'capacity': 43.276},
+            {'name': 120400, 'latitude': 51.06, 'longitude': 4.36, 'capacity': 60.612},
+            {'name': 130031, 'latitude': 51.16, 'longitude': 5.21, 'capacity': 99.0},
+            {'name': 130040, 'latitude': 51.32, 'longitude': 4.86, 'capacity': 50.324},
+            {'name': 130080, 'latitude': 51.16, 'longitude': 4.99, 'capacity': 49.37},
+            {'name': 130110, 'latitude': 51.18, 'longitude': 4.84, 'capacity': 38.788},
+            {'name': 130120, 'latitude': 51.14, 'longitude': 4.75, 'capacity': 41.373},
+            {'name': 130140, 'latitude': 51.4, 'longitude': 4.75, 'capacity': 45.169},
+            {'name': 130190, 'latitude': 51.24, 'longitude': 4.82, 'capacity': 51.473},
+            {'name': 130210, 'latitude': 51.12, 'longitude': 5.08, 'capacity': 31.97},
+            {'name': 130230, 'latitude': 51.36, 'longitude': 4.86, 'capacity': 0.322},
+            {'name': 130250, 'latitude': 51.22, 'longitude': 5.2, 'capacity': 95.12},
+            {'name': 130291, 'latitude': 51.17, 'longitude': 4.89, 'capacity': 9.0},
+            {'name': 130350, 'latitude': 51.38, 'longitude': 5.02, 'capacity': 63.384},
+            {'name': 130370, 'latitude': 51.36, 'longitude': 4.77, 'capacity': 50.554},
+            {'name': 130400, 'latitude': 51.34, 'longitude': 4.93, 'capacity': 47.5},
+            {'name': 130490, 'latitude': 51.09, 'longitude': 4.92, 'capacity': 39.833},
+            {'name': 210010, 'latitude': 50.82, 'longitude': 4.3, 'capacity': 21.129},
+            {'name': 210030, 'latitude': 50.87, 'longitude': 4.29, 'capacity': 23.346},
+            {'name': 210031, 'latitude': 50.87, 'longitude': 4.29, 'capacity': 3.6},
+            {'name': 210040, 'latitude': 50.84, 'longitude': 4.35, 'capacity': 79.694},
+            {'name': 210041, 'latitude': 50.84, 'longitude': 4.35, 'capacity': 3.6},
+            {'name': 210050, 'latitude': 50.83, 'longitude': 4.4, 'capacity': 13.902},
+            {'name': 210060, 'latitude': 50.87, 'longitude': 4.41, 'capacity': 20.436},
+            {'name': 210070, 'latitude': 50.81, 'longitude': 4.32, 'capacity': 23.453},
+            {'name': 210071, 'latitude': 50.81, 'longitude': 4.32, 'capacity': 9.0},
+            {'name': 210080, 'latitude': 50.87, 'longitude': 4.31, 'capacity': 13.585},
+            {'name': 210090, 'latitude': 50.82, 'longitude': 4.38, 'capacity': 10.917},
+            {'name': 210100, 'latitude': 50.87, 'longitude': 4.33, 'capacity': 6.745},
+            {'name': 210101, 'latitude': 50.87, 'longitude': 4.33, 'capacity': 0.033},
+            {'name': 210120, 'latitude': 50.86, 'longitude': 4.32, 'capacity': 12.163},
+            {'name': 210131, 'latitude': 50.83, 'longitude': 4.35, 'capacity': 1.475},
+            {'name': 210140, 'latitude': 50.85, 'longitude': 4.37, 'capacity': 1.608},
+            {'name': 210150, 'latitude': 50.86, 'longitude': 4.38, 'capacity': 35.981},
+            {'name': 210151, 'latitude': 50.86, 'longitude': 4.38, 'capacity': 0.542},
+            {'name': 210160, 'latitude': 50.79, 'longitude': 4.36, 'capacity': 1.326},
+            {'name': 210170, 'latitude': 50.79, 'longitude': 4.42, 'capacity': 8.845},
+            {'name': 210180, 'latitude': 50.85, 'longitude': 4.43, 'capacity': 9.39},
+            {'name': 210181, 'latitude': 50.85, 'longitude': 4.43, 'capacity': 0.044},
+            {'name': 210190, 'latitude': 50.83, 'longitude': 4.45, 'capacity': 10.716},
+            {'name': 230020, 'latitude': 50.91, 'longitude': 4.2, 'capacity': 40.253},
+            {'name': 230250, 'latitude': 50.94, 'longitude': 4.38, 'capacity': 56.501},
+            {'name': 230270, 'latitude': 50.73, 'longitude': 4.23, 'capacity': 80.992},
+            {'name': 230320, 'latitude': 50.72, 'longitude': 4.03, 'capacity': 2.522},
+            {'name': 230330, 'latitude': 50.77, 'longitude': 4.45, 'capacity': 21.994},
+            {'name': 230470, 'latitude': 50.91, 'longitude': 4.44, 'capacity': 48.413},
+            {'name': 230520, 'latitude': 50.96, 'longitude': 4.23, 'capacity': 58.828},
+            {'name': 230940, 'latitude': 50.89, 'longitude': 4.47, 'capacity': 35.093},
+            {'name': 230941, 'latitude': 50.89, 'longitude': 4.47, 'capacity': 8.592},
+            {'name': 230980, 'latitude': 50.79, 'longitude': 4.31, 'capacity': 73.34},
+            {'name': 230981, 'latitude': 50.79, 'longitude': 4.31, 'capacity': 0.033},
+            {'name': 231010, 'latitude': 50.75, 'longitude': 4.38, 'capacity': 20.96},
+            {'name': 231030, 'latitude': 50.85, 'longitude': 4.49, 'capacity': 29.384},
+            {'name': 231040, 'latitude': 50.8, 'longitude': 4.16, 'capacity': 57.097},
+            {'name': 231050, 'latitude': 50.9, 'longitude': 4.11, 'capacity': 61.076},
+            {'name': 240010, 'latitude': 50.98, 'longitude': 4.83, 'capacity': 73.122},
+            {'name': 240200, 'latitude': 50.98, 'longitude': 5.05, 'capacity': 44.235},
+            {'name': 240330, 'latitude': 50.98, 'longitude': 4.64, 'capacity': 67.376},
+            {'name': 240450, 'latitude': 50.79, 'longitude': 4.58, 'capacity': 50.557},
+            {'name': 240540, 'latitude': 50.91, 'longitude': 5.06, 'capacity': 8.763},
+            {'name': 240590, 'latitude': 50.76, 'longitude': 5.08, 'capacity': 4.941},
+            {'name': 240620, 'latitude': 50.88, 'longitude': 4.7, 'capacity': 165.316},
+            {'name': 241070, 'latitude': 50.81, 'longitude': 4.94, 'capacity': 63.673},
+            {'name': 250140, 'latitude': 50.7, 'longitude': 4.35, 'capacity': 56.896},
+            {'name': 250230, 'latitude': 50.62, 'longitude': 4.56, 'capacity': 17.236},
+            {'name': 250310, 'latitude': 50.61, 'longitude': 4.45, 'capacity': 15.899},
+            {'name': 250480, 'latitude': 50.72, 'longitude': 4.86, 'capacity': 34.907},
+            {'name': 250720, 'latitude': 50.6, 'longitude': 4.32, 'capacity': 45.456},
+            {'name': 250910, 'latitude': 50.71, 'longitude': 4.53, 'capacity': 15.507},
+            {'name': 250911, 'latitude': 50.71, 'longitude': 4.53, 'capacity': 0.045},
+            {'name': 251050, 'latitude': 50.69, 'longitude': 4.2, 'capacity': 58.719},
+            {'name': 251070, 'latitude': 50.58, 'longitude': 4.53, 'capacity': 12.166},
+            {'name': 251100, 'latitude': 50.71, 'longitude': 4.4, 'capacity': 12.56},
+            {'name': 251120, 'latitude': 50.72, 'longitude': 4.61, 'capacity': 9.148},
+            {'name': 251121, 'latitude': 50.72, 'longitude': 4.61, 'capacity': 0.8},
+            {'name': 251190, 'latitude': 50.69, 'longitude': 4.48, 'capacity': 9.523},
+            {'name': 251210, 'latitude': 50.67, 'longitude': 4.59, 'capacity': 44.016},
+            {'name': 310030, 'latitude': 51.14, 'longitude': 3.34, 'capacity': 24.475},
+            {'name': 310040, 'latitude': 51.32, 'longitude': 3.13, 'capacity': 16.013},
+            {'name': 310050, 'latitude': 51.21, 'longitude': 3.23, 'capacity': 168.871},
+            {'name': 310051, 'latitude': 51.21, 'longitude': 3.23, 'capacity': 2.486},
+            {'name': 310060, 'latitude': 51.25, 'longitude': 3.28, 'capacity': 11.646},
+            {'name': 310120, 'latitude': 51.18, 'longitude': 3.09, 'capacity': 3.119},
+            {'name': 310221, 'latitude': 51.15, 'longitude': 3.24, 'capacity': 0.456},
+            {'name': 310330, 'latitude': 51.07, 'longitude': 3.1, 'capacity': 4.511},
+            {'name': 310400, 'latitude': 51.14, 'longitude': 3.14, 'capacity': 82.52},
+            {'name': 310401, 'latitude': 51.14, 'longitude': 3.14, 'capacity': 0.778},
+            {'name': 310430, 'latitude': 51.33, 'longitude': 3.31, 'capacity': 24.463},
+            {'name': 320030, 'latitude': 51.03, 'longitude': 2.86, 'capacity': 18.581},
+            {'name': 320100, 'latitude': 51.09, 'longitude': 2.98, 'capacity': 4.148},
+            {'name': 320300, 'latitude': 50.97, 'longitude': 2.78, 'capacity': 43.221},
+            {'name': 330110, 'latitude': 50.85, 'longitude': 2.88, 'capacity': 80.735},
+            {'name': 330210, 'latitude': 50.86, 'longitude': 2.73, 'capacity': 49.159},
+            {'name': 330390, 'latitude': 50.73, 'longitude': 2.83, 'capacity': 14.063},
+            {'name': 340130, 'latitude': 50.85, 'longitude': 3.31, 'capacity': 34.414},
+            {'name': 340220, 'latitude': 50.82, 'longitude': 3.27, 'capacity': 104.633},
+            {'name': 340230, 'latitude': 50.86, 'longitude': 3.28, 'capacity': 27.759},
+            {'name': 340250, 'latitude': 50.89, 'longitude': 3.23, 'capacity': 2.551},
+            {'name': 340270, 'latitude': 50.8, 'longitude': 3.12, 'capacity': 52.722},
+            {'name': 340400, 'latitude': 50.87, 'longitude': 3.41, 'capacity': 77.813},
+            {'name': 340410, 'latitude': 50.81, 'longitude': 3.18, 'capacity': 62.614},
+            {'name': 340411, 'latitude': 50.81, 'longitude': 3.18, 'capacity': 0.285},
+            {'name': 340420, 'latitude': 50.81, 'longitude': 3.35, 'capacity': 60.685},
+            {'name': 350020, 'latitude': 51.24, 'longitude': 2.98, 'capacity': 67.177},
+            {'name': 350050, 'latitude': 51.16, 'longitude': 2.97, 'capacity': 11.267},
+            {'name': 350110, 'latitude': 51.18, 'longitude': 2.81, 'capacity': 1.938},
+            {'name': 350130, 'latitude': 51.23, 'longitude': 2.91, 'capacity': 22.565},
+            {'name': 350131, 'latitude': 51.23, 'longitude': 2.91, 'capacity': 2.647},
+            {'name': 350290, 'latitude': 51.27, 'longitude': 3.04, 'capacity': 11.243},
+            {'name': 360080, 'latitude': 50.92, 'longitude': 3.22, 'capacity': 38.637},
+            {'name': 360110, 'latitude': 51.02, 'longitude': 3.15, 'capacity': 39.899},
+            {'name': 360150, 'latitude': 50.94, 'longitude': 3.12, 'capacity': 151.628},
+            {'name': 360190, 'latitude': 50.97, 'longitude': 3.01, 'capacity': 83.332},
+            {'name': 370100, 'latitude': 50.93, 'longitude': 3.33, 'capacity': 25.866},
+            {'name': 370110, 'latitude': 50.99, 'longitude': 3.27, 'capacity': 61.804},
+            {'name': 370150, 'latitude': 51.0, 'longitude': 3.32, 'capacity': 60.608},
+            {'name': 370170, 'latitude': 50.91, 'longitude': 3.37, 'capacity': 75.289},
+            {'name': 370180, 'latitude': 51.06, 'longitude': 3.28, 'capacity': 35.94},
+            {'name': 380140, 'latitude': 51.1, 'longitude': 2.65, 'capacity': 82.935},
+            {'name': 380160, 'latitude': 51.13, 'longitude': 2.75, 'capacity': 10.432},
+            {'name': 410020, 'latitude': 50.94, 'longitude': 4.04, 'capacity': 111.628},
+            {'name': 410021, 'latitude': 50.94, 'longitude': 4.04, 'capacity': 0.68},
+            {'name': 410180, 'latitude': 50.77, 'longitude': 3.88, 'capacity': 52.019},
+            {'name': 410480, 'latitude': 50.84, 'longitude': 4.02, 'capacity': 61.186},
+            {'name': 410630, 'latitude': 50.92, 'longitude': 3.86, 'capacity': 21.329},
+            {'name': 410810, 'latitude': 50.87, 'longitude': 3.81, 'capacity': 50.311},
+            {'name': 420040, 'latitude': 51.02, 'longitude': 4.2, 'capacity': 60.737},
+            {'name': 420060, 'latitude': 51.03, 'longitude': 4.1, 'capacity': 37.957},
+            {'name': 420080, 'latitude': 51.1, 'longitude': 4.14, 'capacity': 24.514},
+            {'name': 420250, 'latitude': 51.01, 'longitude': 3.89, 'capacity': 21.719},
+            {'name': 420260, 'latitude': 51.01, 'longitude': 3.98, 'capacity': 34.509},
+            {'name': 420280, 'latitude': 51.06, 'longitude': 4.03, 'capacity': 31.451},
+            {'name': 430050, 'latitude': 51.2, 'longitude': 3.57, 'capacity': 53.882},
+            {'name': 430100, 'latitude': 51.19, 'longitude': 3.43, 'capacity': 24.179},
+            {'name': 440010, 'latitude': 51.08, 'longitude': 3.45, 'capacity': 35.693},
+            {'name': 440011, 'latitude': 51.08, 'longitude': 3.45, 'capacity': 1.4},
+            {'name': 440110, 'latitude': 50.98, 'longitude': 3.53, 'capacity': 71.267},
+            {'name': 440130, 'latitude': 51.06, 'longitude': 3.8, 'capacity': 24.847},
+            {'name': 440190, 'latitude': 51.11, 'longitude': 3.71, 'capacity': 82.309},
+            {'name': 440191, 'latitude': 51.11, 'longitude': 3.71, 'capacity': 4.5},
+            {'name': 440200, 'latitude': 50.93, 'longitude': 3.66, 'capacity': 36.591},
+            {'name': 440210, 'latitude': 51.07, 'longitude': 3.73, 'capacity': 291.239},
+            {'name': 440211, 'latitude': 51.07, 'longitude': 3.73, 'capacity': 20.806},
+            {'name': 440290, 'latitude': 51.14, 'longitude': 3.41, 'capacity': 14.595},
+            {'name': 440340, 'latitude': 51.1, 'longitude': 3.83, 'capacity': 44.384},
+            {'name': 440400, 'latitude': 51.0, 'longitude': 3.8, 'capacity': 32.162},
+            {'name': 440401, 'latitude': 51.0, 'longitude': 3.8, 'capacity': 1.6},
+            {'name': 440430, 'latitude': 50.99, 'longitude': 3.75, 'capacity': 54.088},
+            {'name': 440640, 'latitude': 51.01, 'longitude': 3.63, 'capacity': 18.378},
+            {'name': 440720, 'latitude': 51.16, 'longitude': 3.62, 'capacity': 17.152},
+            {'name': 440800, 'latitude': 51.11, 'longitude': 3.56, 'capacity': 22.161},
+            {'name': 450350, 'latitude': 50.84, 'longitude': 3.6, 'capacity': 63.864},
+            {'name': 450410, 'latitude': 50.75, 'longitude': 3.61, 'capacity': 23.286},
+            {'name': 450600, 'latitude': 50.78, 'longitude': 3.52, 'capacity': 26.912},
+            {'name': 450610, 'latitude': 50.84, 'longitude': 3.53, 'capacity': 51.685},
+            {'name': 450650, 'latitude': 50.88, 'longitude': 3.73, 'capacity': 12.885},
+            {'name': 460030, 'latitude': 51.21, 'longitude': 4.26, 'capacity': 97.935},
+            {'name': 460031, 'latitude': 51.21, 'longitude': 4.26, 'capacity': 0.95},
+            {'name': 460140, 'latitude': 51.1, 'longitude': 3.99, 'capacity': 48.41},
+            {'name': 460200, 'latitude': 51.22, 'longitude': 4.13, 'capacity': 59.965},
+            {'name': 460210, 'latitude': 51.16, 'longitude': 4.14, 'capacity': 67.658},
+            {'name': 460250, 'latitude': 51.12, 'longitude': 4.21, 'capacity': 62.349},
+            {'name': 510040, 'latitude': 50.63, 'longitude': 3.79, 'capacity': 36.589},
+            {'name': 510080, 'latitude': 50.55, 'longitude': 3.73, 'capacity': 32.386},
+            {'name': 520110, 'latitude': 50.41, 'longitude': 4.44, 'capacity': 110.491},
+            {'name': 520111, 'latitude': 50.41, 'longitude': 4.44, 'capacity': 5.234},
+            {'name': 520121, 'latitude': 50.4, 'longitude': 4.52, 'capacity': 5.62},
+            {'name': 520150, 'latitude': 50.46, 'longitude': 4.37, 'capacity': 20.806},
+            {'name': 520180, 'latitude': 50.43, 'longitude': 4.55, 'capacity': 19.657},
+            {'name': 520210, 'latitude': 50.48, 'longitude': 4.55, 'capacity': 20.321},
+            {'name': 520211, 'latitude': 50.48, 'longitude': 4.55, 'capacity': 0.754},
+            {'name': 520220, 'latitude': 50.41, 'longitude': 4.32, 'capacity': 10.054},
+            {'name': 520250, 'latitude': 50.34, 'longitude': 4.53, 'capacity': 10.669},
+            {'name': 520550, 'latitude': 50.51, 'longitude': 4.36, 'capacity': 8.178},
+            {'name': 520630, 'latitude': 50.53, 'longitude': 4.27, 'capacity': 10.378},
+            {'name': 520631, 'latitude': 50.53, 'longitude': 4.27, 'capacity': 0.75},
+            {'name': 530200, 'latitude': 50.4, 'longitude': 3.78, 'capacity': 34.473},
+            {'name': 530460, 'latitude': 50.56, 'longitude': 3.9, 'capacity': 86.677},
+            {'name': 530530, 'latitude': 50.46, 'longitude': 3.97, 'capacity': 75.196},
+            {'name': 530531, 'latitude': 50.46, 'longitude': 3.97, 'capacity': 33.33},
+            {'name': 530700, 'latitude': 50.45, 'longitude': 3.82, 'capacity': 13.235},
+            {'name': 530701, 'latitude': 50.45, 'longitude': 3.82, 'capacity': 10.112},
+            {'name': 530820, 'latitude': 50.4, 'longitude': 3.84, 'capacity': 13.186},
+            {'name': 540070, 'latitude': 50.75, 'longitude': 3.22, 'capacity': 134.394},
+            {'name': 540100, 'latitude': 50.76, 'longitude': 2.95, 'capacity': 14.087},
+            {'name': 550040, 'latitude': 50.61, 'longitude': 4.14, 'capacity': 7.086},
+            {'name': 550100, 'latitude': 50.71, 'longitude': 4.04, 'capacity': 9.039},
+            {'name': 550220, 'latitude': 50.48, 'longitude': 4.19, 'capacity': 25.962},
+            {'name': 550230, 'latitude': 50.7, 'longitude': 3.83, 'capacity': 41.719},
+            {'name': 550350, 'latitude': 50.5, 'longitude': 4.11, 'capacity': 17.462},
+            {'name': 550400, 'latitude': 50.58, 'longitude': 4.07, 'capacity': 14.003},
+            {'name': 550500, 'latitude': 50.56, 'longitude': 4.16, 'capacity': 5.033},
+            {'name': 560050, 'latitude': 50.24, 'longitude': 4.24, 'capacity': 9.42},
+            {'name': 560110, 'latitude': 50.41, 'longitude': 4.17, 'capacity': 9.94},
+            {'name': 560440, 'latitude': 50.35, 'longitude': 4.27, 'capacity': 13.581},
+            {'name': 560780, 'latitude': 50.34, 'longitude': 4.29, 'capacity': 9.709},
+            {'name': 560870, 'latitude': 50.45, 'longitude': 4.23, 'capacity': 17.502},
+            {'name': 570030, 'latitude': 50.57, 'longitude': 3.45, 'capacity': 23.849},
+            {'name': 570031, 'latitude': 50.57, 'longitude': 3.45, 'capacity': 20.0},
+            {'name': 570810, 'latitude': 50.61, 'longitude': 3.39, 'capacity': 57.758},
+            {'name': 610030, 'latitude': 50.55, 'longitude': 5.32, 'capacity': 8.578},
+            {'name': 610310, 'latitude': 50.52, 'longitude': 5.24, 'capacity': 14.784},
+            {'name': 610311, 'latitude': 50.52, 'longitude': 5.24, 'capacity': 0.2},
+            {'name': 610680, 'latitude': 50.57, 'longitude': 5.27, 'capacity': 30.191},
+            {'name': 610790, 'latitude': 50.48, 'longitude': 5.52, 'capacity': 8.304},
+            {'name': 610800, 'latitude': 50.58, 'longitude': 5.4, 'capacity': 11.136},
+            {'name': 610810, 'latitude': 50.48, 'longitude': 5.39, 'capacity': 11.059},
+            {'name': 620030, 'latitude': 50.66, 'longitude': 5.53, 'capacity': 63.397},
+            {'name': 620060, 'latitude': 50.66, 'longitude': 5.46, 'capacity': 22.834},
+            {'name': 620090, 'latitude': 50.47, 'longitude': 5.68, 'capacity': 13.333},
+            {'name': 620220, 'latitude': 50.59, 'longitude': 5.64, 'capacity': 0.034},
+            {'name': 620320, 'latitude': 50.53, 'longitude': 5.57, 'capacity': 15.527},
+            {'name': 620380, 'latitude': 50.62, 'longitude': 5.68, 'capacity': 56.068},
+            {'name': 620381, 'latitude': 50.62, 'longitude': 5.68, 'capacity': 0.52},
+            {'name': 620510, 'latitude': 50.67, 'longitude': 5.63, 'capacity': 44.089},
+            {'name': 620511, 'latitude': 50.67, 'longitude': 5.63, 'capacity': 2.35},
+            {'name': 620630, 'latitude': 50.64, 'longitude': 5.63, 'capacity': 66.326},
+            {'name': 620631, 'latitude': 50.64, 'longitude': 5.63, 'capacity': 0.139},
+            {'name': 620960, 'latitude': 50.6, 'longitude': 5.51, 'capacity': 20.591},
+            {'name': 620961, 'latitude': 50.6, 'longitude': 5.51, 'capacity': 2.5},
+            {'name': 621080, 'latitude': 50.73, 'longitude': 5.7, 'capacity': 51.772},
+            {'name': 621081, 'latitude': 50.73, 'longitude': 5.7, 'capacity': 0.01},
+            {'name': 621180, 'latitude': 50.64, 'longitude': 5.47, 'capacity': 12.646},
+            {'name': 621190, 'latitude': 50.67, 'longitude': 5.72, 'capacity': 43.166},
+            {'name': 621200, 'latitude': 50.6, 'longitude': 5.44, 'capacity': 32.935},
+            {'name': 621210, 'latitude': 50.53, 'longitude': 5.48, 'capacity': 17.141},
+            {'name': 630010, 'latitude': 50.35, 'longitude': 6.17, 'capacity': 7.569},
+            {'name': 630130, 'latitude': 50.43, 'longitude': 6.21, 'capacity': 12.597},
+            {'name': 630230, 'latitude': 50.63, 'longitude': 6.03, 'capacity': 36.253},
+            {'name': 630350, 'latitude': 50.64, 'longitude': 5.79, 'capacity': 24.218},
+            {'name': 630351, 'latitude': 50.64, 'longitude': 5.79, 'capacity': 1.65},
+            {'name': 630490, 'latitude': 50.43, 'longitude': 6.03, 'capacity': 12.339},
+            {'name': 630580, 'latitude': 50.57, 'longitude': 5.8, 'capacity': 14.302},
+            {'name': 630581, 'latitude': 50.57, 'longitude': 5.8, 'capacity': 0.017},
+            {'name': 630670, 'latitude': 50.28, 'longitude': 6.13, 'capacity': 14.343},
+            {'name': 630720, 'latitude': 50.48, 'longitude': 5.87, 'capacity': 11.944},
+            {'name': 630760, 'latitude': 50.54, 'longitude': 5.81, 'capacity': 4.965},
+            {'name': 630790, 'latitude': 50.59, 'longitude': 5.86, 'capacity': 34.89},
+            {'name': 630860, 'latitude': 50.37, 'longitude': 5.87, 'capacity': 8.184},
+            {'name': 630880, 'latitude': 50.74, 'longitude': 5.96, 'capacity': 12.983},
+            {'name': 630890, 'latitude': 50.67, 'longitude': 5.88, 'capacity': 13.721},
+            {'name': 640340, 'latitude': 50.67, 'longitude': 5.08, 'capacity': 16.318},
+            {'name': 710040, 'latitude': 51.05, 'longitude': 5.22, 'capacity': 63.589},
+            {'name': 710041, 'latitude': 51.05, 'longitude': 5.22, 'capacity': 0.75},
+            {'name': 710160, 'latitude': 50.96, 'longitude': 5.5, 'capacity': 200.501},
+            {'name': 710161, 'latitude': 50.96, 'longitude': 5.5, 'capacity': 44.6},
+            {'name': 710200, 'latitude': 50.95, 'longitude': 5.11, 'capacity': 31.65},
+            {'name': 710220, 'latitude': 50.93, 'longitude': 5.34, 'capacity': 69.734},
+            {'name': 710221, 'latitude': 50.93, 'longitude': 5.34, 'capacity': 0.35},
+            {'name': 710370, 'latitude': 50.99, 'longitude': 5.19, 'capacity': 48.161},
+            {'name': 710470, 'latitude': 51.04, 'longitude': 5.57, 'capacity': 37.22},
+            {'name': 710530, 'latitude': 50.82, 'longitude': 5.19, 'capacity': 85.085},
+            {'name': 710570, 'latitude': 51.06, 'longitude': 5.06, 'capacity': 123.031},
+            {'name': 710660, 'latitude': 50.99, 'longitude': 5.37, 'capacity': 11.002},
+            {'name': 720040, 'latitude': 51.14, 'longitude': 5.6, 'capacity': 53.556},
+            {'name': 720200, 'latitude': 51.22, 'longitude': 5.3, 'capacity': 98.265},
+            {'name': 720201, 'latitude': 51.22, 'longitude': 5.3, 'capacity': 14.85},
+            {'name': 720210, 'latitude': 51.09, 'longitude': 5.79, 'capacity': 47.505},
+            {'name': 720250, 'latitude': 51.23, 'longitude': 5.43, 'capacity': 28.113},
+            {'name': 720290, 'latitude': 51.19, 'longitude': 5.4, 'capacity': 66.037},
+            {'name': 720380, 'latitude': 51.11, 'longitude': 5.33, 'capacity': 27.739},
+            {'name': 720390, 'latitude': 51.04, 'longitude': 5.42, 'capacity': 84.026},
+            {'name': 720410, 'latitude': 51.04, 'longitude': 5.72, 'capacity': 65.707},
+            {'name': 730010, 'latitude': 50.88, 'longitude': 5.29, 'capacity': 31.82},
+            {'name': 730060, 'latitude': 50.87, 'longitude': 5.52, 'capacity': 50.603},
+            {'name': 730090, 'latitude': 50.8, 'longitude': 5.34, 'capacity': 33.701},
+            {'name': 730420, 'latitude': 50.89, 'longitude': 5.65, 'capacity': 23.392},
+            {'name': 730660, 'latitude': 50.81, 'longitude': 5.6, 'capacity': 58.942},
+            {'name': 730830, 'latitude': 50.78, 'longitude': 5.46, 'capacity': 29.259},
+            {'name': 731070, 'latitude': 50.96, 'longitude': 5.7, 'capacity': 19.411},
+            {'name': 810010, 'latitude': 49.68, 'longitude': 5.82, 'capacity': 34.576},
+            {'name': 810040, 'latitude': 49.56, 'longitude': 5.81, 'capacity': 26.358},
+            {'name': 820031, 'latitude': 50.01, 'longitude': 5.72, 'capacity': 1.75},
+            {'name': 820140, 'latitude': 50.13, 'longitude': 5.79, 'capacity': 7.48},
+            {'name': 820360, 'latitude': 49.94, 'longitude': 5.62, 'capacity': 31.606},
+            {'name': 820361, 'latitude': 49.94, 'longitude': 5.62, 'capacity': 1.16},
+            {'name': 820370, 'latitude': 50.19, 'longitude': 5.94, 'capacity': 19.209},
+            {'name': 820380, 'latitude': 50.02, 'longitude': 5.55, 'capacity': 7.262},
+            {'name': 830120, 'latitude': 50.35, 'longitude': 5.46, 'capacity': 27.448},
+            {'name': 830130, 'latitude': 50.29, 'longitude': 5.56, 'capacity': 9.447},
+            {'name': 830340, 'latitude': 50.23, 'longitude': 5.34, 'capacity': 52.713},
+            {'name': 830440, 'latitude': 50.23, 'longitude': 5.5, 'capacity': 8.38},
+            {'name': 840090, 'latitude': 49.85, 'longitude': 5.25, 'capacity': 7.228},
+            {'name': 840430, 'latitude': 49.84, 'longitude': 5.43, 'capacity': 16.0},
+            {'name': 840500, 'latitude': 49.9, 'longitude': 5.14, 'capacity': 15.19},
+            {'name': 840590, 'latitude': 50.03, 'longitude': 5.37, 'capacity': 6.741},
+            {'name': 840770, 'latitude': 49.95, 'longitude': 5.42, 'capacity': 5.554},
+            {'name': 850070, 'latitude': 49.74, 'longitude': 5.34, 'capacity': 6.594},
+            {'name': 850090, 'latitude': 49.67, 'longitude': 5.6, 'capacity': 28.54},
+            {'name': 850450, 'latitude': 49.57, 'longitude': 5.53, 'capacity': 13.35},
+            {'name': 850451, 'latitude': 49.57, 'longitude': 5.53, 'capacity': 16.722},
+            {'name': 910050, 'latitude': 50.31, 'longitude': 4.88, 'capacity': 7.06},
+            {'name': 910130, 'latitude': 50.11, 'longitude': 4.96, 'capacity': 17.213},
+            {'name': 910150, 'latitude': 49.94, 'longitude': 5.02, 'capacity': 7.097},
+            {'name': 910300, 'latitude': 50.3, 'longitude': 5.1, 'capacity': 19.587},
+            {'name': 910340, 'latitude': 50.26, 'longitude': 4.91, 'capacity': 7.02},
+            {'name': 910640, 'latitude': 50.39, 'longitude': 5.24, 'capacity': 9.957},
+            {'name': 911410, 'latitude': 50.33, 'longitude': 4.88, 'capacity': 5.368},
+            {'name': 911411, 'latitude': 50.33, 'longitude': 4.88, 'capacity': 0.02},
+            {'name': 911420, 'latitude': 50.21, 'longitude': 4.81, 'capacity': 7.694},
+            {'name': 920030, 'latitude': 50.49, 'longitude': 5.1, 'capacity': 26.686},
+            {'name': 920060, 'latitude': 50.37, 'longitude': 5.02, 'capacity': 4.825},
+            {'name': 920350, 'latitude': 50.59, 'longitude': 4.91, 'capacity': 37.828},
+            {'name': 920480, 'latitude': 50.4, 'longitude': 4.7, 'capacity': 13.682},
+            {'name': 920940, 'latitude': 50.46, 'longitude': 4.86, 'capacity': 67.594},
+            {'name': 921010, 'latitude': 50.38, 'longitude': 4.87, 'capacity': 26.299},
+            {'name': 921370, 'latitude': 50.45, 'longitude': 4.61, 'capacity': 35.02},
+            {'name': 921401, 'latitude': 50.47, 'longitude': 4.67, 'capacity': 60.254},
+            {'name': 921420, 'latitude': 50.56, 'longitude': 4.69, 'capacity': 32.328},
+            {'name': 930140, 'latitude': 50.05, 'longitude': 4.5, 'capacity': 6.479},
+            {'name': 930220, 'latitude': 50.25, 'longitude': 4.6, 'capacity': 14.073},
+            {'name': 930560, 'latitude': 50.2, 'longitude': 4.55, 'capacity': 17.511},
+            {'name': 930880, 'latitude': 50.25, 'longitude': 4.43, 'capacity': 14.875}];
+
+        // Tab functionality
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', function() {
+                const targetSource = this.getAttribute('data-source');
+                if (targetSource === currentTab) return;
+                
+                currentTab = targetSource;
+                
+                // Remove active class from all tabs and contents
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+                
+                // Add active class to current tab and content
+                this.classList.add('active');
+                document.getElementById(this.getAttribute('data-target')).classList.add('active');
+                
+                // Initialize the tab's data if not already loaded
+                if (targetSource === 'wind' && !windData) {
+                    initializeWindData();
+                } else if (targetSource === 'solar' && !solarData) {
+                    initializeSolarData();
+                }
+
+                // Initialize the map if not already created
+                if (targetSource === 'wind' && !windMap) {
+                    initializeWindFarmMap();
+                } else if (targetSource === 'solar' && !solarMap) {
+                    initializeSolarPlantMap();
+                }
+            });
+        });
+
+
         // Try to load data, show error if it fails
-        async function initializeData() {
+        async function initializeWindData() {
             try {
-                // Try to fetch data from files
                 const forecastResponse = await fetch('./data/wind/forecast.json');
                 const actualResponse = await fetch('./data/wind/actual.json');
                 const benchmarkResponse = await fetch('./data/wind/benchmark.json');
@@ -280,21 +746,58 @@
                 const actualData = await actualResponse.json();
                 const benchmarkData = await benchmarkResponse.json();
 
-                // Store data globally
-                globalForecastData = forecastData;
-                globalActualData = actualData;
-                globalBenchmarkData = benchmarkData;
-
-                return {
+                windData = {
                     forecast: forecastData,
                     actual: actualData,
                     benchmark: benchmarkData
-                };
+                }
+                
+                createChart(windData, 'wind');
+                updateMetricsDisplay(windData, 'wind');
+
+                return windData;
             } catch (error) {
                 console.error("Error loading data:", error);
-                document.getElementById('forecast-chart').innerHTML =
+                document.getElementById('wind-forecast-chart').innerHTML =
                     `<div class="error-message">Error loading data: ${error.message}</div>`;
-                document.getElementById('forecast-value').innerHTML =
+                document.getElementById('wind-forecast-value').innerHTML =
+                    `<span class="negative">Error</span>`;
+
+                throw error;
+            }
+        }
+
+        // Try to load data, show error if it fails
+        async function initializeSolarData() {
+            try {
+                // Try to fetch data from files
+                const forecastResponse = await fetch('./data/solar/forecast.json');
+                const actualResponse = await fetch('./data/solar/actual.json');
+                const benchmarkResponse = await fetch('./data/solar/benchmark.json');
+
+                if (!forecastResponse.ok || !actualResponse.ok || !benchmarkResponse.ok) {
+                    throw new Error("Could not load data files");
+                }
+
+                const forecastData = await forecastResponse.json();
+                const actualData = await actualResponse.json();
+                const benchmarkData = await benchmarkResponse.json();
+                
+                solarData = {
+                    forecast: forecastData,
+                    actual: actualData,
+                    benchmark: benchmarkData
+                }
+                
+                createChart(solarData, 'solar');
+                updateMetricsDisplay(solarData, 'solar');
+
+                return solarData;
+            } catch (error) {
+                console.error("Error loading data:", error);
+                document.getElementById('solar-forecast-chart').innerHTML =
+                    `<div class="error-message">Error loading data: ${error.message}</div>`;
+                document.getElementById('solar-forecast-value').innerHTML =
                     `<span class="negative">Error</span>`;
                 throw error;
             }
@@ -302,7 +805,6 @@
 
         // Function to calculate RMSE
         function calculateRMSE(forecast, actual) {
-            // Match forecast and actual data by datetime
             const matchedData = [];
 
             for (const actualPoint of actual) {
@@ -315,7 +817,6 @@
                 }
             }
 
-            // Calculate RMSE
             if (matchedData.length === 0) return null;
 
             const sumSquaredErrors = matchedData.reduce((sum, point) => {
@@ -328,7 +829,6 @@
 
         // Function to calculate Winkler Interval Score
         function calculateWinklerIntervalScore(forecast, actual, alpha = 0.2) {
-            // Match forecast and actual data by datetime
             const matchedData = [];
 
             for (const actualPoint of actual) {
@@ -344,7 +844,6 @@
                 }
             }
 
-            // Calculate Winkler Interval Score
             if (matchedData.length === 0) return null;
 
             const scores = matchedData.map(point => {
@@ -371,29 +870,25 @@
             });
         }
 
-        // Function to update metrics display based on date range
-        function updateMetricsDisplayForDateRange(startDate, endDate) {
-            if (!globalForecastData || !globalActualData || !globalBenchmarkData) {
-                console.error("Global data not available");
-                return;
-            }
 
+        // Function to update metrics display
+        function updateMetricsDisplayForDateRange(data, source, startDate, endDate) {
             // Filter data to the current view range
-            const filteredForecast = filterDataByDateRange(globalForecastData.data, startDate, endDate);
-            const filteredActual = filterDataByDateRange(globalActualData.data, startDate, endDate);
-            const filteredBenchmark = filterDataByDateRange(globalBenchmarkData.data, startDate, endDate);
+            const forecastData = filterDataByDateRange(data.forecast.data, startDate, endDate);
+            const actualData = filterDataByDateRange(data.actual.data, startDate, endDate);
+            const benchmarkData = filterDataByDateRange(data.benchmark.data, startDate, endDate);
 
-            // Calculate metrics for filtered data
-            const rmse = calculateRMSE(filteredForecast, filteredActual);
-            const wis = calculateWinklerIntervalScore(filteredForecast, filteredActual);
+            // Calculate metrics
+            const rmse = calculateRMSE(forecastData, actualData);
+            const wis = calculateWinklerIntervalScore(forecastData, actualData);
 
-            const benchmarkRMSE = calculateRMSE(filteredBenchmark, filteredActual);
-            const benchmarkWIS = calculateWinklerIntervalScore(filteredBenchmark, filteredActual);
+            const benchmarkRMSE = calculateRMSE(benchmarkData, actualData);
+            const benchmarkWIS = calculateWinklerIntervalScore(benchmarkData, actualData);
 
             // Update RMSE display
             if (rmse !== null && benchmarkRMSE !== null) {
-                const rmseElement = document.getElementById('rmse-value');
-                const rmseChangeElement = document.getElementById('rmse-change');
+                const rmseElement = document.getElementById(`${source}-rmse-value`);
+                const rmseChangeElement = document.getElementById(`${source}-rmse-change`);
 
                 rmseElement.textContent = rmse.toFixed(2);
 
@@ -411,8 +906,8 @@
 
             // Update WIS display
             if (wis !== null && benchmarkWIS !== null) {
-                const wisElement = document.getElementById('wis-value');
-                const wisChangeElement = document.getElementById('wis-change');
+                const wisElement = document.getElementById(`${source}-wis-value`);
+                const wisChangeElement = document.getElementById(`${source}-wis-change`);
 
                 wisElement.textContent = wis.toFixed(2);
 
@@ -430,12 +925,12 @@
         }
 
         // Initial update of metrics display with all data
-        function updateMetricsDisplay(data) {
+        function updateMetricsDisplay(data, source) {
             const now = new Date();
             const oneMonthAgo = getOneMonthAgoDate();
 
             // Update metrics with default date range (last month)
-            updateMetricsDisplayForDateRange(oneMonthAgo, now);
+            updateMetricsDisplayForDateRange(data, source, oneMonthAgo, now);
         }
 
         // Function to get next update time (11:00 CET next day)
@@ -444,18 +939,21 @@
             const tomorrow = new Date(now);
             tomorrow.setDate(tomorrow.getDate() + 1);
             tomorrow.setHours(11, 0, 0, 0); // 11:00 CET
-
             return tomorrow;
         }
 
-        // Function to format the next update time with actual time and date
+        // Function to format the next update time
         function formatNextUpdateTime(nextUpdate) {
             const hours = nextUpdate.getHours().toString().padStart(2, '0');
             const minutes = nextUpdate.getMinutes().toString().padStart(2, '0');
             const day = nextUpdate.getDate();
             const month = nextUpdate.toLocaleString('default', { month: 'short' });
-
             return `${hours}:${minutes} ${day} ${month}`;
+        }
+
+        // Helper Functions
+        function formatDate(date) {
+            return `${date.getDate()} ${date.toLocaleString('default', { month: 'short' })} at ${date.getHours()}:${String(date.getMinutes()).padStart(2, '0')}`;
         }
 
         // Calculate date for one month ago
@@ -466,8 +964,8 @@
             return oneMonthAgo;
         }
 
-        // Function to create the Plotly chart and set up event listeners
-        function createChart(data) {
+        // Function to create the Plotly chart
+        function createChart(data, source) {
             const forecastData = data.forecast.data;
             const actualData = data.actual.data;
             const benchmarkData = data.benchmark.data;
@@ -483,27 +981,25 @@
                 ...forecastData.map(d => d.ci_upper),
                 ...actualData.map(d => d.value)
             ];
-            const maxY = Math.max(...allYValues) * 1.1; // Add 10% for padding
+            const maxY = Math.max(...allYValues) * 1.1;
 
             // Update forecast value
-            document.getElementById('forecast-value').innerHTML =
+            document.getElementById(`${source}-forecast-value`).innerHTML =
                 `${Math.round(forecastData[forecastData.length-1].forecast)}<span class="forecast-unit">${metadata.units || 'MW'}</span>`;
 
-            // Update last update time with new format
-            let lastUpdateText = "Unknown";
-            if (lastUpdateDate) {
-                lastUpdateText = formatDate(lastUpdateDate);
-            } else {
-                // Fallback to using the last forecast point date if metadata is missing
-                const lastDate = new Date(forecastData[forecastData.length-1].datetime);
-                lastUpdateText = formatDate(lastDate);
-            }
-
+            // Update last update time
+            const lastDate = new Date(forecastData[forecastData.length-1].datetime);      
             const nextUpdate = getNextUpdateTime();
-            document.getElementById('last-update-time').textContent =
-                `Next update: ${formatNextUpdateTime(nextUpdate)} · Last updated: ${lastUpdateText}`;
 
-            // Create the chart traces for forecast data
+            document.getElementById(`${source}-last-update-time`).textContent =
+                `Next update: ${formatNextUpdateTime(nextUpdate)} · Last updated: ${formatDate(lastDate)}`;
+
+            // Set color based on source
+            const primaryColor = source === 'wind' ? '#1e80e9' : '#ff9800';
+            const fillColor = source === 'wind' ? 'rgba(30, 128, 233, 0.15)' : 'rgba(255, 152, 0, 0.15)';
+            const actualColor = source === 'wind' ? '#00eaff' : '#ff4f81'; // neon cyan vs coral-pink
+
+            // Create the chart traces
             const traces = [
                 // Forecast line
                 {
@@ -513,11 +1009,11 @@
                     mode: 'lines',
                     name: 'Forecast',
                     line: {
-                        color: '#e91e63',
+                        color: primaryColor,
                         width: 2
                     }
                 },
-                // CI Area (between upper and lower)
+                // CI Area
                 {
                     x: [
                         ...forecastData.map(d => new Date(d.datetime)),
@@ -529,7 +1025,7 @@
                     ],
                     type: 'scatter',
                     fill: 'toself',
-                    fillcolor: 'rgba(233, 30, 99, 0.15)',
+                    fillcolor: fillColor,
                     line: {width: 0},
                     name: 'CI (80%)',
                     hoverinfo: 'skip'
@@ -538,7 +1034,6 @@
 
             // Create benchmark traces (initially hidden)
             const benchmarkTraces = [
-                // Benchmark forecast line
                 {
                     x: benchmarkData.map(d => new Date(d.datetime)),
                     y: benchmarkData.map(d => d.forecast),
@@ -546,12 +1041,11 @@
                     mode: 'lines',
                     name: 'Benchmark',
                     line: {
-                        color: '#1a73e8',
+                        color: '#929496',
                         width: 2
                     },
                     visible: 'legendonly'
                 },
-                // Benchmark CI Area
                 {
                     x: [
                         ...benchmarkData.map(d => new Date(d.datetime)),
@@ -563,7 +1057,7 @@
                     ],
                     type: 'scatter',
                     fill: 'toself',
-                    fillcolor: 'rgba(26, 115, 232, 0.15)',
+                    fillcolor: 'rgba(146, 148, 150, 0.2)',
                     line: {width: 0},
                     name: 'Benchmark CI (80%)',
                     hoverinfo: 'skip',
@@ -583,7 +1077,7 @@
                     mode: 'lines',
                     name: 'Actual',
                     line: {
-                        color: '#6200ee',
+                        color: actualColor,
                         width: 2.5
                     }
                 });
@@ -738,21 +1232,54 @@
                     yanchor: 'top'
                 });
             }
-
-
-
             // Create the plot
-            Plotly.newPlot('forecast-chart', traces, layout);
+            // Plotly.newPlot('forecast-chart', traces, layout);
+            Plotly.newPlot(`${source}-forecast-chart`, traces, layout);
+
+            // const neonGlowTrace = {
+            //     x: forecastData.map(d => new Date(d.datetime)),
+            //     y: forecastData.map(d => d.forecast),
+            //     type: 'scatter',
+            //     mode: 'lines',
+            //     line: {
+            //         color: 'rgba(0, 255, 255, 0.2)',
+            //         width: 10
+            //     },
+            //     hoverinfo: 'skip',
+            //     showlegend: false
+            // };
+
+            // const sharpLineTrace = {
+            //     x: forecastData.map(d => new Date(d.datetime)),
+            //     y: forecastData.map(d => d.forecast),
+            //     type: 'scatter',
+            //     mode: 'lines',
+            //     name: 'Forecast',
+            //     line: {
+            //         color: '#00ffff',
+            //         width: 2
+            //     }
+            // };
+
+            // Plotly.newPlot(`${source}-forecast-chart`, [neonGlowTrace, sharpLineTrace], layout);
+
+            // document.getElementById(`${source}-forecast-chart`).on('plotly_hover', function(data) {
+            //     const point = data.points[0];
+            //     Plotly.restyle(`${source}-forecast-chart`, {
+            //         'line.color': [['#39ff14', '#00ffff']],
+            //         'line.width': [[8, 2]]
+            //     }, [0, 1]); // Apply to both glow and sharp line
+            // });
 
             // Add event listener for relayout event (triggered when range slider changes)
-            document.getElementById('forecast-chart').on('plotly_relayout', function(eventdata) {
+            document.getElementById(`${source}-forecast-chart`).on('plotly_relayout', function(eventdata) {
                 // Check if range has changed
                 if (eventdata['xaxis.range[0]'] !== undefined && eventdata['xaxis.range[1]'] !== undefined) {
                     const startDate = new Date(eventdata['xaxis.range[0]']);
                     const endDate = new Date(eventdata['xaxis.range[1]']);
 
                     // Update metrics based on new date range
-                    updateMetricsDisplayForDateRange(startDate, endDate);
+                    updateMetricsDisplayForDateRange(data, source, startDate, endDate);
                 }
                 // Also handle range slider changes
                 else if (eventdata['xaxis.range'] !== undefined) {
@@ -761,12 +1288,12 @@
                     const endDate = new Date(endStr);
 
                     // Update metrics based on new date range
-                    updateMetricsDisplayForDateRange(startDate, endDate);
+                    updateMetricsDisplayForDateRange(data, source, startDate, endDate);
                 }
             });
 
             // Add toggle button functionality
-            const toggleButton = document.getElementById('toggle-benchmark');
+            const toggleButton = document.getElementById(`${source}-toggle-benchmark`);
             let benchmarkVisible = false;
 
             toggleButton.addEventListener('click', function() {
@@ -775,10 +1302,10 @@
                 const update = {
                     visible: benchmarkTraces.map(() => benchmarkVisible ? true : 'legendonly')
                 };
-
-                Plotly.update('forecast-chart', update, {}, benchmarkTraces.map((_, i) => i + 2)); // +2 to account for the first 2 traces
-
+                    
+                Plotly.update(`${source}-forecast-chart`, update, {}, benchmarkTraces.map((_, i) => i + 2)); // +2 to account for the first 2 traces
                 toggleButton.textContent = benchmarkVisible ? 'Hide Benchmark Data' : 'Show Benchmark Data';
+                
             });
         }
 
@@ -814,15 +1341,41 @@
                     Location: ${farm.latitude.toFixed(4)}, ${farm.longitude.toFixed(4)}
                 `);
             });
+        }
 
-            // Draw a polygon around all wind farms to show the area
-            // const coordinates = windFarmsData.map(farm => [farm.latitude, farm.longitude]);
-            // L.polygon(coordinates, {
-            //     color: '#e91e63',
-            //     fillColor: '#e91e63',
-            //     fillOpacity: 0.1,
-            //     weight: 1
-            // }).addTo(map);
+
+        // Function to initialize the wind farm map
+        function initializeSolarPlantMap() {
+            // Create map centered on Belgian solar plants
+            const map = L.map('solar-plant-map').setView([50.5, 4.2], 7);
+
+            // Add OpenStreetMap tiles
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            }).addTo(map);
+
+            // Add wind farm markers
+            solarPlantsData.forEach(farm => {
+                // Calculate marker size based on capacity (scaled for visibility)
+                const markerRadius = Math.sqrt(farm.capacity) * 0.7;
+
+                // Create circular marker
+                const marker = L.circleMarker([farm.latitude, farm.longitude], {
+                    radius: markerRadius,
+                    fillColor: '#ffA500',
+                    color: '#ffA500',
+                    weight: 1,
+                    opacity: 1,
+                    fillOpacity: 0.6
+                }).addTo(map);
+
+                // Add popup with information
+                marker.bindPopup(`
+                    <strong>${farm.name}</strong><br>
+                    Capacity: ${farm.capacity} MW<br>
+                    Location: ${farm.latitude.toFixed(4)}, ${farm.longitude.toFixed(4)}
+                `);
+            });
         }
 
         // Helper Functions
@@ -833,17 +1386,18 @@
         // Initialize everything
         document.addEventListener('DOMContentLoaded', async () => {
             try {
-                const data = await initializeData();
-                createChart(data);
-                updateMetricsDisplay(data);
+                // const data = await initializeWindData();
+                const windData = await initializeWindData();
+                createChart(windData, 'wind');
+                updateMetricsDisplay(windData, 'wind');
                 initializeWindFarmMap();
 
-                // Update the next update display time every minute
+                // Update wind next update time every minute
                 setInterval(() => {
                     const nextUpdate = getNextUpdateTime();
-                    const lastDateText = document.getElementById('last-update-time').textContent.split(' · ')[1];
-                    document.getElementById('last-update-time').textContent =
-                        `Next update: ${formatNextUpdateTime(nextUpdate)} · ${lastDateText}`;
+                    const lastText = document.getElementById('wind-last-update-time').textContent.split(' · ')[1];
+                    document.getElementById('wind-last-update-time').textContent =
+                        `Next update: ${formatNextUpdateTime(nextUpdate)} · ${lastText}`;
                 }, 60000);
 
             } catch (error) {
@@ -853,3 +1407,4 @@
     </script>
 </body>
 </html>
+

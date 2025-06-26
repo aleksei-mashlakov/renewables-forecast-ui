@@ -1,0 +1,855 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Offshore Wind Power Forecast</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/leaflet.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/leaflet.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #1a73e8;
+            --secondary-color: #e91e63;
+            --background-color: #f8f9fa;
+            --text-color: #202124;
+            --text-secondary: #5f6368;
+            --border-color: #dadce0;
+            --positive-color: #34a853;
+            --negative-color: #ea4335;
+        }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .title {
+            font-size: 2.2rem;
+            margin-bottom: 0;
+            font-weight: 700;
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            margin-top: 0;
+            margin-bottom: 24px;
+            font-weight: 300;
+        }
+
+        .card {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            margin-bottom: 24px;
+        }
+
+        .forecast-value {
+            font-size: 3rem;
+            margin: 0;
+            font-weight: 700;
+        }
+
+        .forecast-unit {
+            font-size: 1.5rem;
+            font-weight: 300;
+            margin-left: 5px;
+        }
+
+        .info-text {
+            color: var(--text-secondary);
+            margin: 8px 0 0;
+            font-weight: 300;
+        }
+
+        .chart-container {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            margin-bottom: 24px;
+        }
+
+        .chart {
+            width: 100%;
+            height: 400px;
+        }
+
+        .map-container {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            margin-bottom: 24px;
+            /* Increased height to ensure map fits properly */
+            height: 500px;
+            overflow: hidden;
+        }
+
+        #wind-farm-map {
+            width: 100%;
+            height: 100%;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .metrics-card {
+            display: flex;
+            justify-content: space-between; /* Change from space-around to space-between */
+            gap: 10px; /* Add gap for better spacing control */
+            margin-bottom: 20px;
+        }
+
+        .metric-item {
+            text-align: center;
+            padding: 10px 20px;
+            border-radius: 8px;
+            background-color: white;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            flex: 1; /* Make each item take equal space */
+            min-width: 0; /* Allow flex items to shrink below content size */
+        }
+
+        .metric-title {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin: 0;
+        }
+
+        .metric-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin: 5px 0;
+        }
+
+        .metric-change {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9rem;
+        }
+
+        .positive {
+            color: var(--positive-color);
+        }
+
+        .negative {
+            color: var(--negative-color);
+        }
+
+        .arrow-up:before {
+            content: "▲ ";
+        }
+
+        .arrow-down:before {
+            content: "▼ ";
+        }
+
+        .error-message {
+            color: var(--negative-color);
+            font-weight: 500;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .toggle-benchmark {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 500;
+            margin-top: 10px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            transition: background-color 0.3s;
+        }
+
+        .toggle-benchmark:hover {
+            background-color: #0d5bba;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            padding: 20px 0;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .button-container {
+            display: flex;
+            justify-content: center;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="title">Offshore wind forecast 🇧🇪</h1>
+        <p class="subtitle">Offshore Forecast (15-min resolution)</p>
+
+        <!-- Metrics Container -->
+        <div class="metrics-card">
+            <div class="metric-item">
+                <p class="metric-title">RMSE vs Actual</p>
+                <p class="metric-value" id="rmse-value">-</p>
+                <p class="metric-change" id="rmse-change">-</p>
+            </div>
+            <div class="metric-item">
+                <p class="metric-title">Winkler Interval Score (α=0.2)</p>
+                <p class="metric-value" id="wis-value">-</p>
+                <p class="metric-change" id="wis-change">-</p>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2 class="forecast-value" id="forecast-value">0<span class="forecast-unit">MW</span></h2>
+            <p class="info-text" id="last-update-time">
+                Next update: Loading... · Last updated: Loading...
+            </p>
+        </div>
+
+        <div class="chart-container">
+            <h3>Offshore Wind Power Forecast</h3>
+            <div id="forecast-chart" class="chart"></div>
+            <div class="button-container">
+                <button id="toggle-benchmark" class="toggle-benchmark">Show Benchmark Data</button>
+            </div>
+        </div>
+
+        <div class="map-container">
+            <h3>Belgian Offshore Wind Farms (2264.2 MW Total Capacity)</h3>
+            <div id="wind-farm-map"></div>
+        </div>
+
+        <div class="footer">
+            © Copyright <span id="currentYear"></span> Aleksei Mashlakov. Hosted by GitHub Pages.
+        </div>
+    </div>
+
+    <script>
+        // Global variables to store data
+        let globalForecastData = null;
+        let globalActualData = null;
+        let globalBenchmarkData = null;
+
+        // Define the current year
+        document.getElementById('currentYear').textContent = new Date().getFullYear();
+        // Define wind farms data
+        const windFarmsData = [
+            {name: "Mermaid", latitude: 51.72129, longitude: 2.73560, capacity: 237},
+            {name: "Northwester 2", latitude: 51.68639, longitude: 2.75362, capacity: 219},
+            {name: "Belwind", latitude: 51.66755, longitude: 2.80220, capacity: 171},
+            {name: "Nobelwind", latitude: 51.65179, longitude: 2.82589, capacity: 165},
+            {name: "Seastar", latitude: 51.63134, longitude: 2.85868, capacity: 252},
+            {name: "Northwind", latitude: 51.6189, longitude: 2.8997, capacity: 216},
+            {name: "Rentel", latitude: 51.5903, longitude: 2.9457, capacity: 309},
+            {name: "Thorntonbank", latitude: 51.5457, longitude: 2.9546, capacity: 325.2},
+            {name: "Norther", latitude: 51.5239, longitude: 3.0072, capacity: 370}
+        ];
+
+        // Try to load data, show error if it fails
+        async function initializeData() {
+            try {
+                // Try to fetch data from files
+                const forecastResponse = await fetch('./data/wind/forecast.json');
+                const actualResponse = await fetch('./data/wind/actual.json');
+                const benchmarkResponse = await fetch('./data/benchmark.json');
+
+                if (!forecastResponse.ok || !actualResponse.ok || !benchmarkResponse.ok) {
+                    throw new Error("Could not load data files");
+                }
+
+                const forecastData = await forecastResponse.json();
+                const actualData = await actualResponse.json();
+                const benchmarkData = await benchmarkResponse.json();
+
+                // Store data globally
+                globalForecastData = forecastData;
+                globalActualData = actualData;
+                globalBenchmarkData = benchmarkData;
+
+                return {
+                    forecast: forecastData,
+                    actual: actualData,
+                    benchmark: benchmarkData
+                };
+            } catch (error) {
+                console.error("Error loading data:", error);
+                document.getElementById('forecast-chart').innerHTML =
+                    `<div class="error-message">Error loading data: ${error.message}</div>`;
+                document.getElementById('forecast-value').innerHTML =
+                    `<span class="negative">Error</span>`;
+                throw error;
+            }
+        }
+
+        // Function to calculate RMSE
+        function calculateRMSE(forecast, actual) {
+            // Match forecast and actual data by datetime
+            const matchedData = [];
+
+            for (const actualPoint of actual) {
+                const matchingForecast = forecast.find(f => f.datetime === actualPoint.datetime);
+                if (matchingForecast) {
+                    matchedData.push({
+                        actual: actualPoint.value,
+                        forecast: matchingForecast.forecast
+                    });
+                }
+            }
+
+            // Calculate RMSE
+            if (matchedData.length === 0) return null;
+
+            const sumSquaredErrors = matchedData.reduce((sum, point) => {
+                const error = point.forecast - point.actual;
+                return sum + (error * error);
+            }, 0);
+
+            return Math.sqrt(sumSquaredErrors / matchedData.length);
+        }
+
+        // Function to calculate Winkler Interval Score
+        function calculateWinklerIntervalScore(forecast, actual, alpha = 0.2) {
+            // Match forecast and actual data by datetime
+            const matchedData = [];
+
+            for (const actualPoint of actual) {
+                const matchingForecast = forecast.find(f => f.datetime === actualPoint.datetime);
+                if (matchingForecast &&
+                    'ci_upper' in matchingForecast &&
+                    'ci_lower' in matchingForecast) {
+                    matchedData.push({
+                        actual: actualPoint.value,
+                        lower: matchingForecast.ci_lower,
+                        upper: matchingForecast.ci_upper
+                    });
+                }
+            }
+
+            // Calculate Winkler Interval Score
+            if (matchedData.length === 0) return null;
+
+            const scores = matchedData.map(point => {
+                const width = point.upper - point.lower;
+                let penalty = 0;
+
+                if (point.actual < point.lower) {
+                    penalty = 2 * (point.lower - point.actual) / alpha;
+                } else if (point.actual > point.upper) {
+                    penalty = 2 * (point.actual - point.upper) / alpha;
+                }
+
+                return width + penalty;
+            });
+
+            return scores.reduce((sum, score) => sum + score, 0) / scores.length;
+        }
+
+        // Function to filter data by date range
+        function filterDataByDateRange(data, startDate, endDate) {
+            return data.filter(point => {
+                const pointDate = new Date(point.datetime);
+                return pointDate >= startDate && pointDate <= endDate;
+            });
+        }
+
+        // Function to update metrics display based on date range
+        function updateMetricsDisplayForDateRange(startDate, endDate) {
+            if (!globalForecastData || !globalActualData || !globalBenchmarkData) {
+                console.error("Global data not available");
+                return;
+            }
+
+            // Filter data to the current view range
+            const filteredForecast = filterDataByDateRange(globalForecastData.data, startDate, endDate);
+            const filteredActual = filterDataByDateRange(globalActualData.data, startDate, endDate);
+            const filteredBenchmark = filterDataByDateRange(globalBenchmarkData.data, startDate, endDate);
+
+            // Calculate metrics for filtered data
+            const rmse = calculateRMSE(filteredForecast, filteredActual);
+            const wis = calculateWinklerIntervalScore(filteredForecast, filteredActual);
+
+            const benchmarkRMSE = calculateRMSE(filteredBenchmark, filteredActual);
+            const benchmarkWIS = calculateWinklerIntervalScore(filteredBenchmark, filteredActual);
+
+            // Update RMSE display
+            if (rmse !== null && benchmarkRMSE !== null) {
+                const rmseElement = document.getElementById('rmse-value');
+                const rmseChangeElement = document.getElementById('rmse-change');
+
+                rmseElement.textContent = rmse.toFixed(2);
+
+                const rmseDiff = benchmarkRMSE - rmse;
+                const rmsePercent = (rmseDiff / benchmarkRMSE * 100).toFixed(1);
+
+                if (rmseDiff > 0) {
+                    // Our forecast is better (lower RMSE)
+                    rmseChangeElement.innerHTML = `<span class="positive arrow-up">${rmsePercent}% better than benchmark</span>`;
+                } else {
+                    // Benchmark is better
+                    rmseChangeElement.innerHTML = `<span class="negative arrow-down">${Math.abs(rmsePercent)}% worse than benchmark</span>`;
+                }
+            }
+
+            // Update WIS display
+            if (wis !== null && benchmarkWIS !== null) {
+                const wisElement = document.getElementById('wis-value');
+                const wisChangeElement = document.getElementById('wis-change');
+
+                wisElement.textContent = wis.toFixed(2);
+
+                const wisDiff = benchmarkWIS - wis;
+                const wisPercent = (wisDiff / benchmarkWIS * 100).toFixed(1);
+
+                if (wisDiff > 0) {
+                    // Our forecast is better (lower WIS)
+                    wisChangeElement.innerHTML = `<span class="positive arrow-up">${wisPercent}% better than benchmark</span>`;
+                } else {
+                    // Benchmark is better
+                    wisChangeElement.innerHTML = `<span class="negative arrow-down">${Math.abs(wisPercent)}% worse than benchmark</span>`;
+                }
+            }
+        }
+
+        // Initial update of metrics display with all data
+        function updateMetricsDisplay(data) {
+            const now = new Date();
+            const oneMonthAgo = getOneMonthAgoDate();
+
+            // Update metrics with default date range (last month)
+            updateMetricsDisplayForDateRange(oneMonthAgo, now);
+        }
+
+        // Function to get next update time (11:00 CET next day)
+        function getNextUpdateTime() {
+            const now = new Date();
+            const tomorrow = new Date(now);
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            tomorrow.setHours(11, 0, 0, 0); // 11:00 CET
+
+            return tomorrow;
+        }
+
+        // Function to format the next update time with actual time and date
+        function formatNextUpdateTime(nextUpdate) {
+            const hours = nextUpdate.getHours().toString().padStart(2, '0');
+            const minutes = nextUpdate.getMinutes().toString().padStart(2, '0');
+            const day = nextUpdate.getDate();
+            const month = nextUpdate.toLocaleString('default', { month: 'short' });
+
+            return `${hours}:${minutes} ${day} ${month}`;
+        }
+
+        // Calculate date for one month ago
+        function getOneMonthAgoDate() {
+            const now = new Date();
+            const oneMonthAgo = new Date(now);
+            oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
+            return oneMonthAgo;
+        }
+
+        // Function to create the Plotly chart and set up event listeners
+        function createChart(data) {
+            const forecastData = data.forecast.data;
+            const actualData = data.actual.data;
+            const benchmarkData = data.benchmark.data;
+            const metadata = data.forecast.metadata;
+
+            // Extract dates from metadata
+            const lastUpdateDate = metadata.last_update ? new Date(metadata.last_update) : null;
+            const lastFitDate = metadata.last_fit ? new Date(metadata.last_fit) : null;
+
+            // Get maximum y-value for vertical line height
+            const allYValues = [
+                ...forecastData.map(d => d.forecast),
+                ...forecastData.map(d => d.ci_upper),
+                ...actualData.map(d => d.value)
+            ];
+            const maxY = Math.max(...allYValues) * 1.1; // Add 10% for padding
+
+            // Update forecast value
+            document.getElementById('forecast-value').innerHTML =
+                `${Math.round(forecastData[forecastData.length-1].forecast)}<span class="forecast-unit">${metadata.units || 'MW'}</span>`;
+
+            // Update last update time with new format
+            let lastUpdateText = "Unknown";
+            if (lastUpdateDate) {
+                lastUpdateText = formatDate(lastUpdateDate);
+            } else {
+                // Fallback to using the last forecast point date if metadata is missing
+                const lastDate = new Date(forecastData[forecastData.length-1].datetime);
+                lastUpdateText = formatDate(lastDate);
+            }
+
+            const nextUpdate = getNextUpdateTime();
+            document.getElementById('last-update-time').textContent =
+                `Next update: ${formatNextUpdateTime(nextUpdate)} · Last updated: ${lastUpdateText}`;
+
+            // Create the chart traces for forecast data
+            const traces = [
+                // Forecast line
+                {
+                    x: forecastData.map(d => new Date(d.datetime)),
+                    y: forecastData.map(d => d.forecast),
+                    type: 'scatter',
+                    mode: 'lines',
+                    name: 'Forecast',
+                    line: {
+                        color: '#e91e63',
+                        width: 2
+                    }
+                },
+                // CI Area (between upper and lower)
+                {
+                    x: [
+                        ...forecastData.map(d => new Date(d.datetime)),
+                        ...forecastData.map(d => new Date(d.datetime)).reverse()
+                    ],
+                    y: [
+                        ...forecastData.map(d => d.ci_upper),
+                        ...forecastData.map(d => d.ci_lower).reverse()
+                    ],
+                    type: 'scatter',
+                    fill: 'toself',
+                    fillcolor: 'rgba(233, 30, 99, 0.15)',
+                    line: {width: 0},
+                    name: 'CI (80%)',
+                    hoverinfo: 'skip'
+                }
+            ];
+
+            // Create benchmark traces (initially hidden)
+            const benchmarkTraces = [
+                // Benchmark forecast line
+                {
+                    x: benchmarkData.map(d => new Date(d.datetime)),
+                    y: benchmarkData.map(d => d.forecast),
+                    type: 'scatter',
+                    mode: 'lines',
+                    name: 'Benchmark',
+                    line: {
+                        color: '#1a73e8',
+                        width: 2
+                    },
+                    visible: 'legendonly'
+                },
+                // Benchmark CI Area
+                {
+                    x: [
+                        ...benchmarkData.map(d => new Date(d.datetime)),
+                        ...benchmarkData.map(d => new Date(d.datetime)).reverse()
+                    ],
+                    y: [
+                        ...benchmarkData.map(d => d.ci_upper),
+                        ...benchmarkData.map(d => d.ci_lower).reverse()
+                    ],
+                    type: 'scatter',
+                    fill: 'toself',
+                    fillcolor: 'rgba(26, 115, 232, 0.15)',
+                    line: {width: 0},
+                    name: 'Benchmark CI (80%)',
+                    hoverinfo: 'skip',
+                    visible: 'legendonly'
+                }
+            ];
+
+            // Add benchmark traces to all traces
+            traces.push(...benchmarkTraces);
+
+            // Add actual data if available
+            if (actualData && actualData.length > 0) {
+                traces.push({
+                    x: actualData.map(d => new Date(d.datetime)),
+                    y: actualData.map(d => d.value),
+                    type: 'scatter',
+                    mode: 'lines',
+                    name: 'Actual',
+                    line: {
+                        color: '#6200ee',
+                        width: 2.5
+                    }
+                });
+            }
+
+            // Add vertical lines for current time and latest forecast time
+            const now = new Date();
+            const latestForecastTime = new Date(forecastData[forecastData.length-1].datetime);
+
+            // Add current time vertical line (with showlegend=false to hide from legend)
+            traces.push({
+                x: [now, now],
+                y: [0, maxY],
+                type: 'scatter',
+                mode: 'lines',
+                name: 'Now',
+                line: {
+                    color: '#34a853',
+                    width: 1,
+                    dash: 'dash'
+                },
+                showlegend: false
+            });
+
+            // Add latest forecast time vertical line (with showlegend=false to hide from legend)
+            traces.push({
+                x: [latestForecastTime, latestForecastTime],
+                y: [0, maxY],
+                type: 'scatter',
+                mode: 'lines',
+                name: 'Latest Forecast',
+                line: {
+                    color: '#e91e63',
+                    width: 1,
+                    dash: 'dash'
+                },
+                showlegend: false
+            });
+
+            if (lastFitDate) {
+                traces.push({
+                    x: [lastFitDate, lastFitDate],
+                    y: [0, maxY],
+                    type: 'scatter',
+                    mode: 'lines',
+                    name: 'Last Fitted',
+                    line: {
+                        color: '#808f9c', // Orange color to differentiate
+                        width: 1,
+                        dash: 'dash'
+                    },
+                    showlegend: false
+                });
+            }
+
+            // Get date range for setting default range slider values
+            const oneMonthAgo = getOneMonthAgoDate();
+
+            const layout = {
+                // Title removed from here
+                margin: {l: 40, r: 20, t: 30, b: 30}, // Reduced top margin since title is removed
+                legend: {
+                    orientation: 'h',
+                    y: 1.1, // Adjusted position due to title removal
+                    font: {
+                        family: 'Montserrat, sans-serif'
+                    }
+                },
+                hovermode: 'x unified',
+                xaxis: {
+                    showgrid: false,
+                    title: '',
+                    tickfont: {
+                        family: 'Montserrat, sans-serif'
+                    },
+                    // Add range slider
+                    rangeslider: {
+                        visible: true,
+                        thickness: 0.1
+                    },
+                    // Set default range to last month
+                    range: [oneMonthAgo, now]
+                },
+                yaxis: {
+                    title: metadata.units || 'MW',
+                    gridcolor: 'rgba(0, 0, 0, 0.05)',
+                    titlefont: {
+                        family: 'Montserrat, sans-serif'
+                    },
+                    tickfont: {
+                        family: 'Montserrat, sans-serif'
+                    }
+                },
+                annotations: [
+                    {
+                        x: now,
+                        y: maxY * 0.95,
+                        xref: 'x',
+                        yref: 'y',
+                        text: 'Now',
+                        showarrow: false,
+                        font: {
+                            family: 'Montserrat, sans-serif',
+                            size: 12,
+                            color: '#34a853'
+                        },
+                        bgcolor: 'rgba(255, 255, 255, 0.8)',
+                        bordercolor: '#34a853',
+                        borderwidth: 1,
+                        borderpad: 4,
+                        yanchor: 'top'
+                    },
+                    {
+                        x: latestForecastTime,
+                        y: maxY * 0.85,
+                        xref: 'x',
+                        yref: 'y',
+                        text: 'Latest',
+                        showarrow: false,
+                        font: {
+                            family: 'Montserrat, sans-serif',
+                            size: 12,
+                            color: '#e91e63'
+                        },
+                        bgcolor: 'rgba(255, 255, 255, 0.8)',
+                        bordercolor: '#e91e63',
+                        borderwidth: 1,
+                        borderpad: 4,
+                        yanchor: 'top'
+                    }
+                ]
+
+            };
+            // Add annotation for last fitting date if available
+            if (lastFitDate) {
+                layout.annotations.push({
+                    x: lastFitDate,
+                    y: maxY * 0.75, // Position below the other annotations
+                    xref: 'x',
+                    yref: 'y',
+                    text: 'Last Fit',
+                    showarrow: false,
+                    font: {
+                        family: 'Montserrat, sans-serif',
+                        size: 12,
+                        color: '#FFA500'
+                    },
+                    bgcolor: 'rgba(255, 255, 255, 0.8)',
+                    bordercolor: '#FFA500',
+                    borderwidth: 1,
+                    borderpad: 4,
+                    yanchor: 'top'
+                });
+            }
+
+
+
+            // Create the plot
+            Plotly.newPlot('forecast-chart', traces, layout);
+
+            // Add event listener for relayout event (triggered when range slider changes)
+            document.getElementById('forecast-chart').on('plotly_relayout', function(eventdata) {
+                // Check if range has changed
+                if (eventdata['xaxis.range[0]'] !== undefined && eventdata['xaxis.range[1]'] !== undefined) {
+                    const startDate = new Date(eventdata['xaxis.range[0]']);
+                    const endDate = new Date(eventdata['xaxis.range[1]']);
+
+                    // Update metrics based on new date range
+                    updateMetricsDisplayForDateRange(startDate, endDate);
+                }
+                // Also handle range slider changes
+                else if (eventdata['xaxis.range'] !== undefined) {
+                    const [startStr, endStr] = eventdata['xaxis.range'];
+                    const startDate = new Date(startStr);
+                    const endDate = new Date(endStr);
+
+                    // Update metrics based on new date range
+                    updateMetricsDisplayForDateRange(startDate, endDate);
+                }
+            });
+
+            // Add toggle button functionality
+            const toggleButton = document.getElementById('toggle-benchmark');
+            let benchmarkVisible = false;
+
+            toggleButton.addEventListener('click', function() {
+                benchmarkVisible = !benchmarkVisible;
+
+                const update = {
+                    visible: benchmarkTraces.map(() => benchmarkVisible ? true : 'legendonly')
+                };
+
+                Plotly.update('forecast-chart', update, {}, benchmarkTraces.map((_, i) => i + 2)); // +2 to account for the first 2 traces
+
+                toggleButton.textContent = benchmarkVisible ? 'Hide Benchmark Data' : 'Show Benchmark Data';
+            });
+        }
+
+        // Function to initialize the wind farm map
+        function initializeWindFarmMap() {
+            // Create map centered on Belgian offshore wind farms
+            const map = L.map('wind-farm-map').setView([51.63, 2.85], 10);
+
+            // Add OpenStreetMap tiles
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            }).addTo(map);
+
+            // Add wind farm markers
+            windFarmsData.forEach(farm => {
+                // Calculate marker size based on capacity (scaled for visibility)
+                const markerRadius = Math.sqrt(farm.capacity) * 0.7;
+
+                // Create circular marker
+                const marker = L.circleMarker([farm.latitude, farm.longitude], {
+                    radius: markerRadius,
+                    fillColor: '#1a73e8',
+                    color: '#0d5bba',
+                    weight: 1,
+                    opacity: 1,
+                    fillOpacity: 0.6
+                }).addTo(map);
+
+                // Add popup with information
+                marker.bindPopup(`
+                    <strong>${farm.name}</strong><br>
+                    Capacity: ${farm.capacity} MW<br>
+                    Location: ${farm.latitude.toFixed(4)}, ${farm.longitude.toFixed(4)}
+                `);
+            });
+
+            // Draw a polygon around all wind farms to show the area
+            // const coordinates = windFarmsData.map(farm => [farm.latitude, farm.longitude]);
+            // L.polygon(coordinates, {
+            //     color: '#e91e63',
+            //     fillColor: '#e91e63',
+            //     fillOpacity: 0.1,
+            //     weight: 1
+            // }).addTo(map);
+        }
+
+        // Helper Functions
+        function formatDate(date) {
+            return `${date.getDate()} ${date.toLocaleString('default', { month: 'short' })} at ${date.getHours()}:${String(date.getMinutes()).padStart(2, '0')}`;
+        }
+
+        // Initialize everything
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                const data = await initializeData();
+                createChart(data);
+                updateMetricsDisplay(data);
+                initializeWindFarmMap();
+
+                // Update the next update display time every minute
+                setInterval(() => {
+                    const nextUpdate = getNextUpdateTime();
+                    const lastDateText = document.getElementById('last-update-time').textContent.split(' · ')[1];
+                    document.getElementById('last-update-time').textContent =
+                        `Next update: ${formatNextUpdateTime(nextUpdate)} · ${lastDateText}`;
+                }, 60000);
+
+            } catch (error) {
+                console.error("Initialization failed:", error);
+            }
+        });
+    </script>
+</body>
+</html>
