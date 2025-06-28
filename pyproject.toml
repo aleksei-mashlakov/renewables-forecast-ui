@@ -1,7 +1,7 @@
 [project]
-name = "renewables-forecast-ui"
+name = "forecast-ui"
 version = "0.0.1"
-description = "A repository to host wind forecast page"
+description = "A repository to host wind and solar forecast page"
 authors = [{ name = "Aleksei Mashlakov", email = "mashlakov@gmail.com" }]
 readme = "README.md"
 keywords = ['python']
