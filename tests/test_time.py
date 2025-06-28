@@ -1,6 +1,6 @@
 from datetime import UTC, datetime
 
-from src.wind_forecast_ui.time import last_day_start_end, next_day_start_end
+from src.forecast_ui.time import last_day_start_end, next_day_start_end
 
 
 def test_last_day_start_end() -> None:
