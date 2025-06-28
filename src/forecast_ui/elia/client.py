@@ -4,7 +4,7 @@ import polars as pl
 import requests
 from tqdm import tqdm
 
-from wind_forecast_ui.elia.data_schema import EliaDataset
+from forecast_ui.elia.data_schema import EliaDataset
 
 
 class EliaAPIClient:

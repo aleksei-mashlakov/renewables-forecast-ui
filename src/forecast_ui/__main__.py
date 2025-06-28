@@ -2,7 +2,7 @@ import argparse
 
 from loguru import logger
 
-from wind_forecast_ui.io import ForecastConfig, IODataManager
+from forecast_ui.io import ForecastConfig, IODataManager
 
 
 def main(args: dict) -> None:

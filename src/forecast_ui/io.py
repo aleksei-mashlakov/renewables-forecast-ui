@@ -4,16 +4,16 @@ import json
 import polars as pl
 from loguru import logger
 
-from wind_forecast_ui.elia import EliaAPIClient, EliaDataset
-from wind_forecast_ui.path import FilePath
-from wind_forecast_ui.time import last_day_start_end, next_day_start_end
-from wind_forecast_ui.utils import JSONUtils, download_forecast_dataframe
+from forecast_ui.elia import EliaAPIClient, EliaDataset
+from forecast_ui.path import FilePath
+from forecast_ui.time import last_day_start_end, next_day_start_end
+from forecast_ui.utils import JSONUtils, download_forecast_dataframe
 
 
 class BaseForecastConfig:
     """Base class for forecast configuration."""
 
-    def __init__(self, realtime_dataset: EliaDataset, history_dataset: EliaDataset, namespace: str):
+    def __init__(self, realtime_dataset: EliaDataset, history_dataset: EliaDataset, namespace: str) -> None:
         self.realtime_dataset: EliaDataset = realtime_dataset
         self.history_dataset: EliaDataset = history_dataset
         self.namespace: str = namespace
