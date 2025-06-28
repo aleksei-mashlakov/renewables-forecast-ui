@@ -29,7 +29,7 @@ jobs:
         uses: ./.github/actions/setup-python-env
 
       - name: Update forecast data
-        run: uv run python -m src.wind_forecast_ui --update forecast
+        run: uv run python -m src.forecast_ui --update forecast
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
 

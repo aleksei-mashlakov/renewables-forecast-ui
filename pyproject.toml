@@ -1,5 +1,5 @@
 [project]
-name = "wind-forecast-ui"
+name = "renewables-forecast-ui"
 version = "0.0.1"
 description = "A repository to host wind forecast page"
 authors = [{ name = "Aleksei Mashlakov", email = "mashlakov@gmail.com" }]
@@ -21,9 +21,9 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage = "https://aleksei-mashlakov.github.io/wind-forecast-ui/"
-Repository = "https://github.com/aleksei-mashlakov/wind-forecast-ui"
-Documentation = "https://aleksei-mashlakov.github.io/wind-forecast-ui/"
+Homepage = "https://aleksei-mashlakov.github.io/renewables-forecast-ui/"
+Repository = "https://github.com/aleksei-mashlakov/renewables-forecast-ui"
+Documentation = "https://aleksei-mashlakov.github.io/renewables-forecast-ui/"
 
 [dependency-groups]
 dev = [

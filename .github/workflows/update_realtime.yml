@@ -30,7 +30,7 @@ jobs:
         uses: ./.github/actions/setup-python-env
 
       - name: Update realtime
-        run: uv run python -m src.wind_forecast_ui --update realtime
+        run: uv run python -m src.forecast_ui --update realtime
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
 
