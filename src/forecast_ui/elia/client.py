@@ -7,6 +7,12 @@ from tqdm import tqdm
 from forecast_ui.elia.data_schema import EliaDataset
 
 
+class NotValidDatasetError(ValueError):
+    def __init__(self, dataset: str) -> None:
+        message = f"Unsupported dataset: {dataset}"
+        super().__init__(message)
+
+
 class EliaAPIClient:
     """Client for interacting with the Elia API."""
 
@@ -59,7 +65,7 @@ def realtime_url(dataset: EliaDataset) -> str:
                 "&select=datetime,realtime,dayahead11hforecast,dayahead11hconfidence10,dayahead11hconfidence90,monitoredcapacity,loadfactor"
             )
         case _:
-            raise ValueError(f"Unsupported dataset: {dataset}")
+            raise NotValidDatasetError(dataset.name)
 
 
 def generate_url_history(dt: datetime, dataset: EliaDataset) -> str:
@@ -80,4 +86,4 @@ def generate_url_history(dt: datetime, dataset: EliaDataset) -> str:
                 "&select=datetime,measured,dayahead11hforecast,dayahead11hconfidence10,dayahead11hconfidence90,monitoredcapacity,loadfactor"
             )
         case _:
-            raise ValueError(f"Unsupported dataset: {dataset}")
+            raise NotValidDatasetError(dataset.name)

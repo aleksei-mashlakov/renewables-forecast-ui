@@ -337,7 +337,7 @@
     <script>
         // Define the current year
         document.getElementById('currentYear').textContent = new Date().getFullYear();
-        
+
         // Initialize maps and data containers
         let windMap = null;
         let solarMap = null;
@@ -703,17 +703,17 @@
             tab.addEventListener('click', function() {
                 const targetSource = this.getAttribute('data-source');
                 if (targetSource === currentTab) return;
-                
+
                 currentTab = targetSource;
-                
+
                 // Remove active class from all tabs and contents
                 document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
                 document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
-                
+
                 // Add active class to current tab and content
                 this.classList.add('active');
                 document.getElementById(this.getAttribute('data-target')).classList.add('active');
-                
+
                 // Initialize the tab's data if not already loaded
                 if (targetSource === 'wind' && !windData) {
                     initializeWindData();
@@ -751,7 +751,7 @@
                     actual: actualData,
                     benchmark: benchmarkData
                 }
-                
+
                 createChart(windData, 'wind');
                 updateMetricsDisplay(windData, 'wind');
 
@@ -782,13 +782,13 @@
                 const forecastData = await forecastResponse.json();
                 const actualData = await actualResponse.json();
                 const benchmarkData = await benchmarkResponse.json();
-                
+
                 solarData = {
                     forecast: forecastData,
                     actual: actualData,
                     benchmark: benchmarkData
                 }
-                
+
                 createChart(solarData, 'solar');
                 updateMetricsDisplay(solarData, 'solar');
 
@@ -988,7 +988,7 @@
                 `${Math.round(forecastData[forecastData.length-1].forecast)}<span class="forecast-unit">${metadata.units || 'MW'}</span>`;
 
             // Update last update time
-            const lastDate = new Date(forecastData[forecastData.length-1].datetime);      
+            const lastDate = new Date(forecastData[forecastData.length-1].datetime);
             const nextUpdate = getNextUpdateTime();
 
             document.getElementById(`${source}-last-update-time`).textContent =
@@ -1302,10 +1302,10 @@
                 const update = {
                     visible: benchmarkTraces.map(() => benchmarkVisible ? true : 'legendonly')
                 };
-                    
+
                 Plotly.update(`${source}-forecast-chart`, update, {}, benchmarkTraces.map((_, i) => i + 2)); // +2 to account for the first 2 traces
                 toggleButton.textContent = benchmarkVisible ? 'Hide Benchmark Data' : 'Show Benchmark Data';
-                
+
             });
         }
 
