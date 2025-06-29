@@ -71,7 +71,7 @@ def generate_url_history(dt: datetime, dataset: EliaDataset) -> str:
             return (
                 f"https://opendata.elia.be/api/explore/v2.1/catalog/datasets/{dataset.value[0]}/records"
                 f"?refine=offshoreonshore%3A%22Offshore%22&limit=-1&refine=datetime%3A%22{year}%2F{month}%2F{day}%22"
-                "&select=datetime,realtime,dayahead11hforecast,dayahead11hconfidence10,dayahead11hconfidence90,monitoredcapacity,loadfactor,decrementalbidid"
+                "&select=datetime,measured,dayahead11hforecast,dayahead11hconfidence10,dayahead11hconfidence90,monitoredcapacity,loadfactor,decrementalbidid"
             )
         case EliaDataset.SOLAR_HISTORY:
             return (

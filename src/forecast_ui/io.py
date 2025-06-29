@@ -76,7 +76,13 @@ class IODataManager:
         filepath = FilePath.forecast_file(self._frcst_config.namespace)
         data = JSONUtils.load_json(filepath)
         data["data"] = json.loads(
-            pl.concat([convert_json_to_forecast_dataframe(data), next_day_forecast], how="vertical")
+            pl.concat(
+                [
+                    convert_json_to_forecast_dataframe(data).select(["datetime", "ci_lower", "forecast", "ci_upper"]),
+                    next_day_forecast,
+                ],
+                how="vertical",
+            )
             .unique("datetime", keep="last")
             .sort("datetime")
             .write_json()
@@ -107,7 +113,13 @@ class IODataManager:
         filepath = FilePath.benchmark_file(self._frcst_config.namespace)
         data = JSONUtils.load_json(filepath)
         data["data"] = json.loads(
-            pl.concat([convert_json_to_forecast_dataframe(data), next_day_benchmark], how="vertical")
+            pl.concat(
+                [
+                    convert_json_to_forecast_dataframe(data).select(["datetime", "ci_lower", "forecast", "ci_upper"]),
+                    next_day_benchmark,
+                ],
+                how="vertical",
+            )
             .unique("datetime", keep="last")
             .sort("datetime")
             .write_json()
@@ -142,7 +154,7 @@ class IODataManager:
         data["data"] = json.loads(
             pl.concat(
                 [
-                    convert_json_to_forecast_dataframe(data),
+                    convert_json_to_forecast_dataframe(data).select(["datetime", "ci_lower", "forecast", "ci_upper"]),
                     history_benchmark.select(["datetime", "ci_lower", "forecast", "ci_upper"]).drop_nulls(),
                 ],
                 how="vertical",
