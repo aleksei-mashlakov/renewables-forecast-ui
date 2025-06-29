@@ -60,9 +60,13 @@ class IODataManager:
         )
         JSONUtils.save_json(filepath, data)
 
-    def update_forecast_file(self) -> None:
+    def update_forecast_file(
+        self, start: datetime.datetime | None = None, end: datetime.datetime | None = None
+    ) -> None:
         """Update the forecast file with new data."""
-        start, end = next_day_start_end("CET")
+        if start is None or end is None:
+            start, end = last_day_start_end("CET")
+
         hf_filepath = FilePath.hf_filename(self._frcst_config.namespace)
         next_day_forecast = (
             download_forecast_dataframe(hf_filepath)
