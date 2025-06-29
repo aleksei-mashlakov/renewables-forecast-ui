@@ -30,6 +30,7 @@ EliaHistoryWindSchema = pl.Schema([
     ("dayahead11hconfidence90", pl.Float64),
     ("monitoredcapacity", pl.Float64),
     ("loadfactor", pl.Float64),
+    ("decrementalbidid", pl.String),
 ])
 
 
