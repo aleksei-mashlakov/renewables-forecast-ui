@@ -926,11 +926,12 @@
 
         // Initial update of metrics display with all data
         function updateMetricsDisplay(data, source) {
-            const now = new Date();
+            // const now = new Date();
+            const tomorrow = getNextDayEnd();
             const oneMonthAgo = getOneMonthAgoDate();
 
             // Update metrics with default date range (last month)
-            updateMetricsDisplayForDateRange(data, source, oneMonthAgo, now);
+            updateMetricsDisplayForDateRange(data, source, oneMonthAgo, tomorrow);
         }
 
         // Function to get next update time (11:00 CET next day)
@@ -939,6 +940,15 @@
             const tomorrow = new Date(now);
             tomorrow.setDate(tomorrow.getDate() + 1);
             tomorrow.setHours(11, 0, 0, 0); // 11:00 CET
+            return tomorrow;
+        }
+
+        // Function to get next update time (11:00 CET next day)
+        function getNextDayEnd() {
+            const now = new Date();
+            const tomorrow = new Date(now);
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            tomorrow.setHours(23, 59, 59, 59); // 11:00 CET
             return tomorrow;
         }
 
@@ -964,6 +974,15 @@
             return oneMonthAgo;
         }
 
+
+        // Calculate date for one week ago
+        function getOneWeekAgoDate() {
+            const now = new Date();
+            const oneWeekAgo = new Date(now);
+            oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+            return oneWeekAgo;
+        }
+
         // Function to create the Plotly chart
         function createChart(data, source) {
             const forecastData = data.forecast.data;
@@ -972,7 +991,20 @@
             const metadata = data.forecast.metadata;
 
             // Extract dates from metadata
-            const lastUpdateDate = metadata.last_update ? new Date(metadata.last_update) : null;
+            // Parse last_update as UTC if possible, else fallback to local
+            let lastUpdateDate = null;
+            if (metadata.last_update) {
+                // Try to parse as ISO string with timezone
+                lastUpdateDate = new Date(metadata.last_update);
+                // If string does not contain timezone, treat as UTC
+                if (
+                    typeof metadata.last_update === 'string' &&
+                    !metadata.last_update.match(/[zZ]|([+-]\d{2}:\d{2})/)
+                ) {
+                    // Add 'Z' to treat as UTC
+                    lastUpdateDate = new Date(metadata.last_update + 'Z');
+                }
+            }
             const lastFitDate = metadata.last_fit ? new Date(metadata.last_fit) : null;
 
             // Get maximum y-value for vertical line height
@@ -1103,20 +1135,21 @@
             });
 
             // Add latest forecast time vertical line (with showlegend=false to hide from legend)
-            traces.push({
-                x: [latestForecastTime, latestForecastTime],
-                y: [0, maxY],
-                type: 'scatter',
-                mode: 'lines',
-                name: 'Latest Forecast',
-                line: {
-                    color: '#e91e63',
-                    width: 1,
-                    dash: 'dash'
-                },
-                showlegend: false
-            });
-
+            if (lastUpdateDate) {
+                traces.push({
+                    x: [lastUpdateDate, lastUpdateDate],
+                    y: [0, maxY],
+                    type: 'scatter',
+                    mode: 'lines',
+                    name: 'Latest Forecast',
+                    line: {
+                        color: '#e91e63',
+                        width: 1,
+                        dash: 'dash'
+                    },
+                    showlegend: false
+                });
+            }
             if (lastFitDate) {
                 traces.push({
                     x: [lastFitDate, lastFitDate],
@@ -1135,6 +1168,8 @@
 
             // Get date range for setting default range slider values
             const oneMonthAgo = getOneMonthAgoDate();
+            const oneWeekAgo = getOneWeekAgoDate();
+            const tomorrow = getNextDayEnd();
 
             const layout = {
                 // Title removed from here
@@ -1159,7 +1194,7 @@
                         thickness: 0.1
                     },
                     // Set default range to last month
-                    range: [oneMonthAgo, now]
+                    range: [oneWeekAgo, tomorrow]
                 },
                 yaxis: {
                     title: metadata.units || 'MW',
@@ -1174,7 +1209,7 @@
                 annotations: [
                     {
                         x: now,
-                        y: maxY * 0.95,
+                        y: maxY,
                         xref: 'x',
                         yref: 'y',
                         text: 'Now',
@@ -1191,8 +1226,8 @@
                         yanchor: 'top'
                     },
                     {
-                        x: latestForecastTime,
-                        y: maxY * 0.85,
+                        x: lastUpdateDate,
+                        y: maxY,
                         xref: 'x',
                         yref: 'y',
                         text: 'Latest',
@@ -1215,7 +1250,7 @@
             if (lastFitDate) {
                 layout.annotations.push({
                     x: lastFitDate,
-                    y: maxY * 0.75, // Position below the other annotations
+                    y: maxY,
                     xref: 'x',
                     yref: 'y',
                     text: 'Last Fit',
