@@ -65,7 +65,7 @@ class IODataManager:
     ) -> None:
         """Update the forecast file with new data."""
         if start is None or end is None:
-            start, end = last_day_start_end("CET")
+            start, end = next_day_start_end("CET")
 
         hf_filepath = FilePath.hf_filename(self._frcst_config.namespace)
         next_day_forecast = (
