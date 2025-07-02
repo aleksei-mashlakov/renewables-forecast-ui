@@ -105359,6 +105359,582 @@
       "ci_lower": 180.2,
       "forecast": 529.7,
       "ci_upper": 1028.3
+    },
+    {
+      "datetime": "2025-07-02T22:00:00Z",
+      "ci_lower": 216.7,
+      "forecast": 459.6,
+      "ci_upper": 701.5
+    },
+    {
+      "datetime": "2025-07-02T22:15:00Z",
+      "ci_lower": 231.5,
+      "forecast": 486.0,
+      "ci_upper": 727.8
+    },
+    {
+      "datetime": "2025-07-02T22:30:00Z",
+      "ci_lower": 238.6,
+      "forecast": 504.7,
+      "ci_upper": 746.6
+    },
+    {
+      "datetime": "2025-07-02T22:45:00Z",
+      "ci_lower": 242.0,
+      "forecast": 518.6,
+      "ci_upper": 762.7
+    },
+    {
+      "datetime": "2025-07-02T23:00:00Z",
+      "ci_lower": 242.1,
+      "forecast": 528.4,
+      "ci_upper": 776.6
+    },
+    {
+      "datetime": "2025-07-02T23:15:00Z",
+      "ci_lower": 243.2,
+      "forecast": 537.6,
+      "ci_upper": 792.2
+    },
+    {
+      "datetime": "2025-07-02T23:30:00Z",
+      "ci_lower": 244.1,
+      "forecast": 547.3,
+      "ci_upper": 807.9
+    },
+    {
+      "datetime": "2025-07-02T23:45:00Z",
+      "ci_lower": 247.5,
+      "forecast": 556.7,
+      "ci_upper": 823.1
+    },
+    {
+      "datetime": "2025-07-03T00:00:00Z",
+      "ci_lower": 252.5,
+      "forecast": 565.4,
+      "ci_upper": 837.0
+    },
+    {
+      "datetime": "2025-07-03T00:15:00Z",
+      "ci_lower": 250.7,
+      "forecast": 565.1,
+      "ci_upper": 841.5
+    },
+    {
+      "datetime": "2025-07-03T00:30:00Z",
+      "ci_lower": 247.5,
+      "forecast": 563.2,
+      "ci_upper": 844.5
+    },
+    {
+      "datetime": "2025-07-03T00:45:00Z",
+      "ci_lower": 242.6,
+      "forecast": 558.9,
+      "ci_upper": 844.2
+    },
+    {
+      "datetime": "2025-07-03T01:00:00Z",
+      "ci_lower": 242.2,
+      "forecast": 558.5,
+      "ci_upper": 846.7
+    },
+    {
+      "datetime": "2025-07-03T01:15:00Z",
+      "ci_lower": 241.3,
+      "forecast": 556.9,
+      "ci_upper": 847.1
+    },
+    {
+      "datetime": "2025-07-03T01:30:00Z",
+      "ci_lower": 239.3,
+      "forecast": 554.1,
+      "ci_upper": 845.9
+    },
+    {
+      "datetime": "2025-07-03T01:45:00Z",
+      "ci_lower": 236.1,
+      "forecast": 549.0,
+      "ci_upper": 840.0
+    },
+    {
+      "datetime": "2025-07-03T02:00:00Z",
+      "ci_lower": 228.3,
+      "forecast": 538.5,
+      "ci_upper": 825.9
+    },
+    {
+      "datetime": "2025-07-03T02:15:00Z",
+      "ci_lower": 225.1,
+      "forecast": 531.3,
+      "ci_upper": 812.6
+    },
+    {
+      "datetime": "2025-07-03T02:30:00Z",
+      "ci_lower": 222.1,
+      "forecast": 524.6,
+      "ci_upper": 799.3
+    },
+    {
+      "datetime": "2025-07-03T02:45:00Z",
+      "ci_lower": 218.7,
+      "forecast": 517.5,
+      "ci_upper": 787.4
+    },
+    {
+      "datetime": "2025-07-03T03:00:00Z",
+      "ci_lower": 219.6,
+      "forecast": 514.4,
+      "ci_upper": 781.3
+    },
+    {
+      "datetime": "2025-07-03T03:15:00Z",
+      "ci_lower": 211.2,
+      "forecast": 502.1,
+      "ci_upper": 767.9
+    },
+    {
+      "datetime": "2025-07-03T03:30:00Z",
+      "ci_lower": 202.9,
+      "forecast": 490.0,
+      "ci_upper": 754.8
+    },
+    {
+      "datetime": "2025-07-03T03:45:00Z",
+      "ci_lower": 196.4,
+      "forecast": 477.8,
+      "ci_upper": 739.6
+    },
+    {
+      "datetime": "2025-07-03T04:00:00Z",
+      "ci_lower": 186.8,
+      "forecast": 460.0,
+      "ci_upper": 717.8
+    },
+    {
+      "datetime": "2025-07-03T04:15:00Z",
+      "ci_lower": 178.9,
+      "forecast": 442.1,
+      "ci_upper": 694.0
+    },
+    {
+      "datetime": "2025-07-03T04:30:00Z",
+      "ci_lower": 170.6,
+      "forecast": 424.3,
+      "ci_upper": 670.2
+    },
+    {
+      "datetime": "2025-07-03T04:45:00Z",
+      "ci_lower": 162.4,
+      "forecast": 406.2,
+      "ci_upper": 647.5
+    },
+    {
+      "datetime": "2025-07-03T05:00:00Z",
+      "ci_lower": 143.4,
+      "forecast": 377.7,
+      "ci_upper": 614.7
+    },
+    {
+      "datetime": "2025-07-03T05:15:00Z",
+      "ci_lower": 129.9,
+      "forecast": 354.6,
+      "ci_upper": 588.9
+    },
+    {
+      "datetime": "2025-07-03T05:30:00Z",
+      "ci_lower": 116.5,
+      "forecast": 331.9,
+      "ci_upper": 563.0
+    },
+    {
+      "datetime": "2025-07-03T05:45:00Z",
+      "ci_lower": 104.7,
+      "forecast": 308.9,
+      "ci_upper": 535.8
+    },
+    {
+      "datetime": "2025-07-03T06:00:00Z",
+      "ci_lower": 90.3,
+      "forecast": 282.0,
+      "ci_upper": 503.2
+    },
+    {
+      "datetime": "2025-07-03T06:15:00Z",
+      "ci_lower": 83.4,
+      "forecast": 261.0,
+      "ci_upper": 474.9
+    },
+    {
+      "datetime": "2025-07-03T06:30:00Z",
+      "ci_lower": 76.5,
+      "forecast": 239.9,
+      "ci_upper": 446.5
+    },
+    {
+      "datetime": "2025-07-03T06:45:00Z",
+      "ci_lower": 71.6,
+      "forecast": 218.7,
+      "ci_upper": 415.8
+    },
+    {
+      "datetime": "2025-07-03T07:00:00Z",
+      "ci_lower": 70.4,
+      "forecast": 200.0,
+      "ci_upper": 384.7
+    },
+    {
+      "datetime": "2025-07-03T07:15:00Z",
+      "ci_lower": 71.8,
+      "forecast": 182.3,
+      "ci_upper": 352.4
+    },
+    {
+      "datetime": "2025-07-03T07:30:00Z",
+      "ci_lower": 73.4,
+      "forecast": 164.5,
+      "ci_upper": 319.9
+    },
+    {
+      "datetime": "2025-07-03T07:45:00Z",
+      "ci_lower": 68.4,
+      "forecast": 146.9,
+      "ci_upper": 292.5
+    },
+    {
+      "datetime": "2025-07-03T08:00:00Z",
+      "ci_lower": 58.3,
+      "forecast": 129.6,
+      "ci_upper": 270.8
+    },
+    {
+      "datetime": "2025-07-03T08:15:00Z",
+      "ci_lower": 44.6,
+      "forecast": 115.5,
+      "ci_upper": 256.9
+    },
+    {
+      "datetime": "2025-07-03T08:30:00Z",
+      "ci_lower": 30.8,
+      "forecast": 101.4,
+      "ci_upper": 243.4
+    },
+    {
+      "datetime": "2025-07-03T08:45:00Z",
+      "ci_lower": 17.6,
+      "forecast": 87.4,
+      "ci_upper": 229.7
+    },
+    {
+      "datetime": "2025-07-03T09:00:00Z",
+      "ci_lower": 8.1,
+      "forecast": 72.8,
+      "ci_upper": 215.4
+    },
+    {
+      "datetime": "2025-07-03T09:15:00Z",
+      "ci_lower": 4.6,
+      "forecast": 63.4,
+      "ci_upper": 206.1
+    },
+    {
+      "datetime": "2025-07-03T09:30:00Z",
+      "ci_lower": 1.5,
+      "forecast": 53.7,
+      "ci_upper": 196.6
+    },
+    {
+      "datetime": "2025-07-03T09:45:00Z",
+      "ci_lower": 0.2,
+      "forecast": 43.9,
+      "ci_upper": 186.9
+    },
+    {
+      "datetime": "2025-07-03T10:00:00Z",
+      "ci_lower": 0.0,
+      "forecast": 35.0,
+      "ci_upper": 177.8
+    },
+    {
+      "datetime": "2025-07-03T10:15:00Z",
+      "ci_lower": 0.0,
+      "forecast": 30.2,
+      "ci_upper": 172.2
+    },
+    {
+      "datetime": "2025-07-03T10:30:00Z",
+      "ci_lower": 0.0,
+      "forecast": 25.1,
+      "ci_upper": 166.6
+    },
+    {
+      "datetime": "2025-07-03T10:45:00Z",
+      "ci_lower": 0.0,
+      "forecast": 20.2,
+      "ci_upper": 161.3
+    },
+    {
+      "datetime": "2025-07-03T11:00:00Z",
+      "ci_lower": 0.0,
+      "forecast": 16.3,
+      "ci_upper": 157.1
+    },
+    {
+      "datetime": "2025-07-03T11:15:00Z",
+      "ci_lower": 0.0,
+      "forecast": 14.1,
+      "ci_upper": 155.3
+    },
+    {
+      "datetime": "2025-07-03T11:30:00Z",
+      "ci_lower": 0.0,
+      "forecast": 12.3,
+      "ci_upper": 153.4
+    },
+    {
+      "datetime": "2025-07-03T11:45:00Z",
+      "ci_lower": 0.0,
+      "forecast": 10.4,
+      "ci_upper": 151.1
+    },
+    {
+      "datetime": "2025-07-03T12:00:00Z",
+      "ci_lower": 0.0,
+      "forecast": 9.2,
+      "ci_upper": 150.0
+    },
+    {
+      "datetime": "2025-07-03T12:15:00Z",
+      "ci_lower": 0.0,
+      "forecast": 8.5,
+      "ci_upper": 149.0
+    },
+    {
+      "datetime": "2025-07-03T12:30:00Z",
+      "ci_lower": 0.0,
+      "forecast": 8.0,
+      "ci_upper": 148.4
+    },
+    {
+      "datetime": "2025-07-03T12:45:00Z",
+      "ci_lower": 0.0,
+      "forecast": 7.7,
+      "ci_upper": 147.9
+    },
+    {
+      "datetime": "2025-07-03T13:00:00Z",
+      "ci_lower": 0.0,
+      "forecast": 8.0,
+      "ci_upper": 148.4
+    },
+    {
+      "datetime": "2025-07-03T13:15:00Z",
+      "ci_lower": 0.0,
+      "forecast": 8.0,
+      "ci_upper": 148.3
+    },
+    {
+      "datetime": "2025-07-03T13:30:00Z",
+      "ci_lower": 0.0,
+      "forecast": 8.0,
+      "ci_upper": 148.5
+    },
+    {
+      "datetime": "2025-07-03T13:45:00Z",
+      "ci_lower": 0.0,
+      "forecast": 8.4,
+      "ci_upper": 149.2
+    },
+    {
+      "datetime": "2025-07-03T14:00:00Z",
+      "ci_lower": 0.0,
+      "forecast": 8.8,
+      "ci_upper": 150.3
+    },
+    {
+      "datetime": "2025-07-03T14:15:00Z",
+      "ci_lower": 0.0,
+      "forecast": 9.3,
+      "ci_upper": 151.7
+    },
+    {
+      "datetime": "2025-07-03T14:30:00Z",
+      "ci_lower": 0.0,
+      "forecast": 9.4,
+      "ci_upper": 152.6
+    },
+    {
+      "datetime": "2025-07-03T14:45:00Z",
+      "ci_lower": 0.0,
+      "forecast": 9.6,
+      "ci_upper": 154.2
+    },
+    {
+      "datetime": "2025-07-03T15:00:00Z",
+      "ci_lower": 0.0,
+      "forecast": 10.0,
+      "ci_upper": 155.9
+    },
+    {
+      "datetime": "2025-07-03T15:15:00Z",
+      "ci_lower": 0.0,
+      "forecast": 10.4,
+      "ci_upper": 158.2
+    },
+    {
+      "datetime": "2025-07-03T15:30:00Z",
+      "ci_lower": 0.0,
+      "forecast": 10.7,
+      "ci_upper": 160.4
+    },
+    {
+      "datetime": "2025-07-03T15:45:00Z",
+      "ci_lower": 0.0,
+      "forecast": 11.0,
+      "ci_upper": 161.6
+    },
+    {
+      "datetime": "2025-07-03T16:00:00Z",
+      "ci_lower": 0.0,
+      "forecast": 12.4,
+      "ci_upper": 163.4
+    },
+    {
+      "datetime": "2025-07-03T16:15:00Z",
+      "ci_lower": 0.0,
+      "forecast": 12.6,
+      "ci_upper": 162.8
+    },
+    {
+      "datetime": "2025-07-03T16:30:00Z",
+      "ci_lower": 0.0,
+      "forecast": 13.0,
+      "ci_upper": 162.4
+    },
+    {
+      "datetime": "2025-07-03T16:45:00Z",
+      "ci_lower": 0.0,
+      "forecast": 13.1,
+      "ci_upper": 162.0
+    },
+    {
+      "datetime": "2025-07-03T17:00:00Z",
+      "ci_lower": 0.0,
+      "forecast": 12.8,
+      "ci_upper": 160.7
+    },
+    {
+      "datetime": "2025-07-03T17:15:00Z",
+      "ci_lower": 0.0,
+      "forecast": 13.1,
+      "ci_upper": 160.3
+    },
+    {
+      "datetime": "2025-07-03T17:30:00Z",
+      "ci_lower": 0.0,
+      "forecast": 13.0,
+      "ci_upper": 159.0
+    },
+    {
+      "datetime": "2025-07-03T17:45:00Z",
+      "ci_lower": 0.0,
+      "forecast": 13.0,
+      "ci_upper": 158.6
+    },
+    {
+      "datetime": "2025-07-03T18:00:00Z",
+      "ci_lower": 0.0,
+      "forecast": 13.0,
+      "ci_upper": 158.7
+    },
+    {
+      "datetime": "2025-07-03T18:15:00Z",
+      "ci_lower": 0.0,
+      "forecast": 12.9,
+      "ci_upper": 159.7
+    },
+    {
+      "datetime": "2025-07-03T18:30:00Z",
+      "ci_lower": 0.0,
+      "forecast": 13.0,
+      "ci_upper": 160.4
+    },
+    {
+      "datetime": "2025-07-03T18:45:00Z",
+      "ci_lower": 0.0,
+      "forecast": 13.4,
+      "ci_upper": 161.7
+    },
+    {
+      "datetime": "2025-07-03T19:00:00Z",
+      "ci_lower": 0.0,
+      "forecast": 14.3,
+      "ci_upper": 163.9
+    },
+    {
+      "datetime": "2025-07-03T19:15:00Z",
+      "ci_lower": 0.0,
+      "forecast": 14.6,
+      "ci_upper": 165.9
+    },
+    {
+      "datetime": "2025-07-03T19:30:00Z",
+      "ci_lower": 0.0,
+      "forecast": 15.2,
+      "ci_upper": 168.0
+    },
+    {
+      "datetime": "2025-07-03T19:45:00Z",
+      "ci_lower": 0.0,
+      "forecast": 15.6,
+      "ci_upper": 169.9
+    },
+    {
+      "datetime": "2025-07-03T20:00:00Z",
+      "ci_lower": 0.0,
+      "forecast": 17.3,
+      "ci_upper": 173.0
+    },
+    {
+      "datetime": "2025-07-03T20:15:00Z",
+      "ci_lower": 0.0,
+      "forecast": 17.8,
+      "ci_upper": 175.0
+    },
+    {
+      "datetime": "2025-07-03T20:30:00Z",
+      "ci_lower": 0.0,
+      "forecast": 18.3,
+      "ci_upper": 176.8
+    },
+    {
+      "datetime": "2025-07-03T20:45:00Z",
+      "ci_lower": 0.0,
+      "forecast": 18.7,
+      "ci_upper": 178.3
+    },
+    {
+      "datetime": "2025-07-03T21:00:00Z",
+      "ci_lower": 0.0,
+      "forecast": 19.1,
+      "ci_upper": 179.7
+    },
+    {
+      "datetime": "2025-07-03T21:15:00Z",
+      "ci_lower": 0.0,
+      "forecast": 19.8,
+      "ci_upper": 181.4
+    },
+    {
+      "datetime": "2025-07-03T21:30:00Z",
+      "ci_lower": 0.0,
+      "forecast": 20.6,
+      "ci_upper": 182.9
+    },
+    {
+      "datetime": "2025-07-03T21:45:00Z",
+      "ci_lower": 0.0,
+      "forecast": 21.7,
+      "ci_upper": 184.3
     }
   ],
   "metadata": {
