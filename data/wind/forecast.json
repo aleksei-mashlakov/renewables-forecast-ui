@@ -120335,11 +120335,185 @@
       "ci_lower": 10.8,
       "forecast": 94.0,
       "ci_upper": 293.8
+    },
+    {
+      "datetime": "2025-07-28T22:00:00Z",
+      "ci_lower": 62.4,
+      "forecast": 150.2,
+      "ci_upper": 327.8
+    },
+    {
+      "datetime": "2025-07-28T22:15:00Z",
+      "ci_lower": 40.7,
+      "forecast": 112.6,
+      "ci_upper": 281.6
+    },
+    {
+      "datetime": "2025-07-28T22:30:00Z",
+      "ci_lower": 29.3,
+      "forecast": 93.0,
+      "ci_upper": 272.0
+    },
+    {
+      "datetime": "2025-07-28T22:45:00Z",
+      "ci_lower": 25.1,
+      "forecast": 74.4,
+      "ci_upper": 252.4
+    },
+    {
+      "datetime": "2025-07-28T23:00:00Z",
+      "ci_lower": 1.0,
+      "forecast": 25.3,
+      "ci_upper": 195.3
+    },
+    {
+      "datetime": "2025-07-28T23:15:00Z",
+      "ci_lower": -7.9,
+      "forecast": 21.6,
+      "ci_upper": 123.4
+    },
+    {
+      "datetime": "2025-07-28T23:30:00Z",
+      "ci_lower": -7.8,
+      "forecast": 8.0,
+      "ci_upper": 101.8
+    },
+    {
+      "datetime": "2025-07-28T23:45:00Z",
+      "ci_lower": -12.4,
+      "forecast": 7.5,
+      "ci_upper": 87.0
+    },
+    {
+      "datetime": "2025-07-29T00:00:00Z",
+      "ci_lower": -5.8,
+      "forecast": 8.3,
+      "ci_upper": 65.5
+    },
+    {
+      "datetime": "2025-07-29T00:15:00Z",
+      "ci_lower": -3.3,
+      "forecast": 5.6,
+      "ci_upper": 65.5
+    },
+    {
+      "datetime": "2025-07-29T00:30:00Z",
+      "ci_lower": -2.9,
+      "forecast": -2.6,
+      "ci_upper": 67.6
+    },
+    {
+      "datetime": "2025-07-29T00:45:00Z",
+      "ci_lower": -4.0,
+      "forecast": -3.0,
+      "ci_upper": 70.8
+    },
+    {
+      "datetime": "2025-07-29T01:00:00Z",
+      "ci_lower": -4.0,
+      "forecast": -3.0,
+      "ci_upper": 75.0
+    },
+    {
+      "datetime": "2025-07-29T01:15:00Z",
+      "ci_lower": -12.1,
+      "forecast": -7.4,
+      "ci_upper": 72.6
+    },
+    {
+      "datetime": "2025-07-29T01:30:00Z",
+      "ci_lower": -11.1,
+      "forecast": -7.6,
+      "ci_upper": 72.6
+    },
+    {
+      "datetime": "2025-07-29T01:45:00Z",
+      "ci_lower": -8.0,
+      "forecast": 0.1,
+      "ci_upper": 73.7
+    },
+    {
+      "datetime": "2025-07-29T02:00:00Z",
+      "ci_lower": -7.0,
+      "forecast": 1.4,
+      "ci_upper": 87.8
+    },
+    {
+      "datetime": "2025-07-29T02:15:00Z",
+      "ci_lower": -6.6,
+      "forecast": 3.3,
+      "ci_upper": 89.5
+    },
+    {
+      "datetime": "2025-07-29T02:30:00Z",
+      "ci_lower": -10.0,
+      "forecast": 5.2,
+      "ci_upper": 92.1
+    },
+    {
+      "datetime": "2025-07-29T02:45:00Z",
+      "ci_lower": -15.0,
+      "forecast": 0.1,
+      "ci_upper": 89.6
+    },
+    {
+      "datetime": "2025-07-29T03:00:00Z",
+      "ci_lower": -14.5,
+      "forecast": 2.9,
+      "ci_upper": 94.8
+    },
+    {
+      "datetime": "2025-07-29T03:15:00Z",
+      "ci_lower": -12.2,
+      "forecast": 11.1,
+      "ci_upper": 85.4
+    },
+    {
+      "datetime": "2025-07-29T03:30:00Z",
+      "ci_lower": -10.4,
+      "forecast": 22.4,
+      "ci_upper": 89.8
+    },
+    {
+      "datetime": "2025-07-29T03:45:00Z",
+      "ci_lower": -9.0,
+      "forecast": 27.0,
+      "ci_upper": 92.0
+    },
+    {
+      "datetime": "2025-07-29T04:00:00Z",
+      "ci_lower": -9.9,
+      "forecast": 26.7,
+      "ci_upper": 107.3
+    },
+    {
+      "datetime": "2025-07-29T04:15:00Z",
+      "ci_lower": -10.1,
+      "forecast": 23.0,
+      "ci_upper": 111.5
+    },
+    {
+      "datetime": "2025-07-29T04:30:00Z",
+      "ci_lower": 3.1,
+      "forecast": 31.9,
+      "ci_upper": 104.9
+    },
+    {
+      "datetime": "2025-07-29T04:45:00Z",
+      "ci_lower": 10.4,
+      "forecast": 30.6,
+      "ci_upper": 114.9
+    },
+    {
+      "datetime": "2025-07-29T05:00:00Z",
+      "ci_lower": 10.6,
+      "forecast": 38.8,
+      "ci_upper": 120.6
     }
   ],
   "metadata": {
     "last_fit": "2025-06-28T00:00:00Z",
-    "last_update": "2025-07-27T09:17:26Z",
+    "last_update": "2025-07-28T09:25:17Z",
     "model_label": "test",
     "tso_region": "BE",
     "units": "MW"
