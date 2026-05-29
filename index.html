@@ -700,7 +700,7 @@
 
         // Tab functionality
         document.querySelectorAll('.tab').forEach(tab => {
-            tab.addEventListener('click', function() {
+            tab.addEventListener('click', async function() {
                 const targetSource = this.getAttribute('data-source');
                 if (targetSource === currentTab) return;
 
@@ -715,17 +715,23 @@
                 document.getElementById(this.getAttribute('data-target')).classList.add('active');
 
                 // Initialize the tab's data if not already loaded
-                if (targetSource === 'wind' && !windData) {
-                    initializeWindData();
-                } else if (targetSource === 'solar' && !solarData) {
-                    initializeSolarData();
-                }
+                try {
+                    if (targetSource === 'wind' && !windData) {
+                        await initializeWindData();
+                    } else if (targetSource === 'solar' && !solarData) {
+                        await initializeSolarData();
+                    }
 
-                // Initialize the map if not already created
-                if (targetSource === 'wind' && !windMap) {
-                    initializeWindFarmMap();
-                } else if (targetSource === 'solar' && !solarMap) {
-                    initializeSolarPlantMap();
+                    // Initialize the map if not already created
+                    if (targetSource === 'wind' && !windMap) {
+                        initializeWindFarmMap();
+                        windMap = true;
+                    } else if (targetSource === 'solar' && !solarMap) {
+                        initializeSolarPlantMap();
+                        solarMap = true;
+                    }
+                } catch (error) {
+                    console.error("Error initializing tab:", error);
                 }
             });
         });
@@ -758,10 +764,16 @@
                 return windData;
             } catch (error) {
                 console.error("Error loading data:", error);
-                document.getElementById('wind-forecast-chart').innerHTML =
-                    `<div class="error-message">Error loading data: ${error.message}</div>`;
-                document.getElementById('wind-forecast-value').innerHTML =
-                    `<span class="negative">Error</span>`;
+                const windChartElement = document.getElementById('wind-forecast-chart');
+                if (windChartElement) {
+                    windChartElement.innerHTML =
+                        `<div class="error-message">Error loading data: ${error.message}</div>`;
+                }
+                const windValueElement = document.getElementById('wind-forecast-value');
+                if (windValueElement) {
+                    windValueElement.innerHTML =
+                        `<span class="negative">Error</span>`;
+                }
 
                 throw error;
             }
@@ -795,10 +807,16 @@
                 return solarData;
             } catch (error) {
                 console.error("Error loading data:", error);
-                document.getElementById('solar-forecast-chart').innerHTML =
-                    `<div class="error-message">Error loading data: ${error.message}</div>`;
-                document.getElementById('solar-forecast-value').innerHTML =
-                    `<span class="negative">Error</span>`;
+                const solarChartElement = document.getElementById('solar-forecast-chart');
+                if (solarChartElement) {
+                    solarChartElement.innerHTML =
+                        `<div class="error-message">Error loading data: ${error.message}</div>`;
+                }
+                const solarValueElement = document.getElementById('solar-forecast-value');
+                if (solarValueElement) {
+                    solarValueElement.innerHTML =
+                        `<span class="negative">Error</span>`;
+                }
                 throw error;
             }
         }
@@ -873,6 +891,11 @@
 
         // Function to update metrics display
         function updateMetricsDisplayForDateRange(data, source, startDate, endDate) {
+            if (!data || !data.forecast || !data.forecast.data || !data.actual || !data.actual.data || !data.benchmark || !data.benchmark.data) {
+                console.error("Invalid data structure:", data);
+                return;
+            }
+
             // Filter data to the current view range
             const forecastData = filterDataByDateRange(data.forecast.data, startDate, endDate);
             const actualData = filterDataByDateRange(data.actual.data, startDate, endDate);
@@ -890,17 +913,18 @@
                 const rmseElement = document.getElementById(`${source}-rmse-value`);
                 const rmseChangeElement = document.getElementById(`${source}-rmse-change`);
 
-                rmseElement.textContent = rmse.toFixed(2);
+                if (rmseElement) rmseElement.textContent = rmse.toFixed(2);
+                if (rmseChangeElement) {
+                    const rmseDiff = benchmarkRMSE - rmse;
+                    const rmsePercent = (rmseDiff / benchmarkRMSE * 100).toFixed(1);
 
-                const rmseDiff = benchmarkRMSE - rmse;
-                const rmsePercent = (rmseDiff / benchmarkRMSE * 100).toFixed(1);
-
-                if (rmseDiff > 0) {
-                    // Our forecast is better (lower RMSE)
-                    rmseChangeElement.innerHTML = `<span class="positive arrow-up">${rmsePercent}% better than benchmark</span>`;
-                } else {
-                    // Benchmark is better
-                    rmseChangeElement.innerHTML = `<span class="negative arrow-down">${Math.abs(rmsePercent)}% worse than benchmark</span>`;
+                    if (rmseDiff > 0) {
+                        // Our forecast is better (lower RMSE)
+                        rmseChangeElement.innerHTML = `<span class="positive arrow-up">${rmsePercent}% better than benchmark</span>`;
+                    } else {
+                        // Benchmark is better
+                        rmseChangeElement.innerHTML = `<span class="negative arrow-down">${Math.abs(rmsePercent)}% worse than benchmark</span>`;
+                    }
                 }
             }
 
@@ -909,17 +933,18 @@
                 const wisElement = document.getElementById(`${source}-wis-value`);
                 const wisChangeElement = document.getElementById(`${source}-wis-change`);
 
-                wisElement.textContent = wis.toFixed(2);
+                if (wisElement) wisElement.textContent = wis.toFixed(2);
+                if (wisChangeElement) {
+                    const wisDiff = benchmarkWIS - wis;
+                    const wisPercent = (wisDiff / benchmarkWIS * 100).toFixed(1);
 
-                const wisDiff = benchmarkWIS - wis;
-                const wisPercent = (wisDiff / benchmarkWIS * 100).toFixed(1);
-
-                if (wisDiff > 0) {
-                    // Our forecast is better (lower WIS)
-                    wisChangeElement.innerHTML = `<span class="positive arrow-up">${wisPercent}% better than benchmark</span>`;
-                } else {
-                    // Benchmark is better
-                    wisChangeElement.innerHTML = `<span class="negative arrow-down">${Math.abs(wisPercent)}% worse than benchmark</span>`;
+                    if (wisDiff > 0) {
+                        // Our forecast is better (lower WIS)
+                        wisChangeElement.innerHTML = `<span class="positive arrow-up">${wisPercent}% better than benchmark</span>`;
+                    } else {
+                        // Benchmark is better
+                        wisChangeElement.innerHTML = `<span class="negative arrow-down">${Math.abs(wisPercent)}% worse than benchmark</span>`;
+                    }
                 }
             }
         }
@@ -985,10 +1010,21 @@
 
         // Function to create the Plotly chart
         function createChart(data, source) {
+            if (!data || !data.forecast || !data.forecast.data || !data.actual || !data.actual.data || !data.benchmark || !data.benchmark.data) {
+                console.error("Invalid data structure for createChart:", data);
+                return;
+            }
+
             const forecastData = data.forecast.data;
             const actualData = data.actual.data;
             const benchmarkData = data.benchmark.data;
-            const metadata = data.forecast.metadata;
+            const metadata = data.forecast.metadata || {};
+
+            // Check if we have data to work with
+            if (forecastData.length === 0) {
+                console.error("No forecast data available");
+                return;
+            }
 
             // Extract dates from metadata
             // Parse last_update as UTC if possible, else fallback to local
@@ -1016,15 +1052,21 @@
             const maxY = Math.max(...allYValues) * 1.1;
 
             // Update forecast value
-            document.getElementById(`${source}-forecast-value`).innerHTML =
-                `${Math.round(forecastData[forecastData.length-1].forecast)}<span class="forecast-unit">${metadata.units || 'MW'}</span>`;
+            const forecastValueElement = document.getElementById(`${source}-forecast-value`);
+            if (forecastValueElement) {
+                forecastValueElement.innerHTML =
+                    `${Math.round(forecastData[forecastData.length-1].forecast)}<span class="forecast-unit">${metadata.units || 'MW'}</span>`;
+            }
 
             // Update last update time
             const lastDate = new Date(forecastData[forecastData.length-1].datetime);
             const nextUpdate = getNextUpdateTime();
 
-            document.getElementById(`${source}-last-update-time`).textContent =
-                `Next update: ${formatNextUpdateTime(nextUpdate)} · Last updated: ${formatDate(lastDate)}`;
+            const lastUpdateTimeElement = document.getElementById(`${source}-last-update-time`);
+            if (lastUpdateTimeElement) {
+                lastUpdateTimeElement.textContent =
+                    `Next update: ${formatNextUpdateTime(nextUpdate)} · Last updated: ${formatDate(lastDate)}`;
+            }
 
             // Set color based on source
             const primaryColor = source === 'wind' ? '#1e80e9' : '#ff9800';
@@ -1269,6 +1311,12 @@
             }
             // Create the plot
             // Plotly.newPlot('forecast-chart', traces, layout);
+            const chartElement = document.getElementById(`${source}-forecast-chart`);
+            if (!chartElement) {
+                console.error(`Chart element not found: ${source}-forecast-chart`);
+                return;
+            }
+
             Plotly.newPlot(`${source}-forecast-chart`, traces, layout);
 
             // const neonGlowTrace = {
@@ -1307,41 +1355,45 @@
             // });
 
             // Add event listener for relayout event (triggered when range slider changes)
-            document.getElementById(`${source}-forecast-chart`).on('plotly_relayout', function(eventdata) {
-                // Check if range has changed
-                if (eventdata['xaxis.range[0]'] !== undefined && eventdata['xaxis.range[1]'] !== undefined) {
-                    const startDate = new Date(eventdata['xaxis.range[0]']);
-                    const endDate = new Date(eventdata['xaxis.range[1]']);
+            if (chartElement) {
+                chartElement.on('plotly_relayout', function(eventdata) {
+                    // Check if range has changed
+                    if (eventdata['xaxis.range[0]'] !== undefined && eventdata['xaxis.range[1]'] !== undefined) {
+                        const startDate = new Date(eventdata['xaxis.range[0]']);
+                        const endDate = new Date(eventdata['xaxis.range[1]']);
 
-                    // Update metrics based on new date range
-                    updateMetricsDisplayForDateRange(data, source, startDate, endDate);
-                }
-                // Also handle range slider changes
-                else if (eventdata['xaxis.range'] !== undefined) {
-                    const [startStr, endStr] = eventdata['xaxis.range'];
-                    const startDate = new Date(startStr);
-                    const endDate = new Date(endStr);
+                        // Update metrics based on new date range
+                        updateMetricsDisplayForDateRange(data, source, startDate, endDate);
+                    }
+                    // Also handle range slider changes
+                    else if (eventdata['xaxis.range'] !== undefined) {
+                        const [startStr, endStr] = eventdata['xaxis.range'];
+                        const startDate = new Date(startStr);
+                        const endDate = new Date(endStr);
 
-                    // Update metrics based on new date range
-                    updateMetricsDisplayForDateRange(data, source, startDate, endDate);
-                }
-            });
+                        // Update metrics based on new date range
+                        updateMetricsDisplayForDateRange(data, source, startDate, endDate);
+                    }
+                });
+            }
 
             // Add toggle button functionality
             const toggleButton = document.getElementById(`${source}-toggle-benchmark`);
-            let benchmarkVisible = false;
+            if (toggleButton) {
+                let benchmarkVisible = false;
 
-            toggleButton.addEventListener('click', function() {
-                benchmarkVisible = !benchmarkVisible;
+                toggleButton.addEventListener('click', function() {
+                    benchmarkVisible = !benchmarkVisible;
 
-                const update = {
-                    visible: benchmarkTraces.map(() => benchmarkVisible ? true : 'legendonly')
-                };
+                    const update = {
+                        visible: benchmarkTraces.map(() => benchmarkVisible ? true : 'legendonly')
+                    };
 
-                Plotly.update(`${source}-forecast-chart`, update, {}, benchmarkTraces.map((_, i) => i + 2)); // +2 to account for the first 2 traces
-                toggleButton.textContent = benchmarkVisible ? 'Hide Benchmark Data' : 'Show Benchmark Data';
+                    Plotly.update(`${source}-forecast-chart`, update, {}, benchmarkTraces.map((_, i) => i + 2)); // +2 to account for the first 2 traces
+                    toggleButton.textContent = benchmarkVisible ? 'Hide Benchmark Data' : 'Show Benchmark Data';
 
-            });
+                });
+            }
         }
 
         // Function to initialize the wind farm map
@@ -1422,17 +1474,23 @@
         document.addEventListener('DOMContentLoaded', async () => {
             try {
                 // const data = await initializeWindData();
-                const windData = await initializeWindData();
-                createChart(windData, 'wind');
-                updateMetricsDisplay(windData, 'wind');
-                initializeWindFarmMap();
+                const windDataResult = await initializeWindData();
+                if (windDataResult) {
+                    createChart(windDataResult, 'wind');
+                    updateMetricsDisplay(windDataResult, 'wind');
+                    windMap = true;
+                    initializeWindFarmMap();
+                }
 
                 // Update wind next update time every minute
                 setInterval(() => {
                     const nextUpdate = getNextUpdateTime();
-                    const lastText = document.getElementById('wind-last-update-time').textContent.split(' · ')[1];
-                    document.getElementById('wind-last-update-time').textContent =
-                        `Next update: ${formatNextUpdateTime(nextUpdate)} · ${lastText}`;
+                    const lastUpdateElement = document.getElementById('wind-last-update-time');
+                    if (lastUpdateElement) {
+                        const lastText = lastUpdateElement.textContent.split(' · ')[1];
+                        lastUpdateElement.textContent =
+                            `Next update: ${formatNextUpdateTime(nextUpdate)} · ${lastText}`;
+                    }
                 }, 60000);
 
             } catch (error) {
