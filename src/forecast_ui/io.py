@@ -9,6 +9,8 @@ from forecast_ui.path import FilePath
 from forecast_ui.time import last_day_start_end, next_day_start_end
 from forecast_ui.utils import JSONUtils, download_forecast_dataframe
 
+RETENTION_PERIOD_MONTHS: int = 6
+
 
 class BaseForecastConfig:
     """Base class for forecast configuration."""
@@ -56,6 +58,14 @@ class IODataManager:
             pl.concat([convert_json_to_actual_dataframe(data), realtime_data], how="vertical")
             .unique("datetime", keep="last")
             .sort("datetime")
+            .filter(
+                pl.col("datetime")
+                >= (
+                    pl.col("datetime").max()
+                    + datetime.timedelta(days=1)
+                    - datetime.timedelta(months=RETENTION_PERIOD_MONTHS)
+                )
+            )
             .write_json(),
         )
         JSONUtils.save_json(filepath, data)
@@ -89,6 +99,9 @@ class IODataManager:
             )
             .unique("datetime", keep="last")
             .sort("datetime")
+            .filter(
+                pl.col("datetime") >= (pl.col("datetime").max() - datetime.timedelta(months=RETENTION_PERIOD_MONTHS))
+            )
             .write_json()
         )
         data["metadata"]["last_update"] = datetime.datetime.now(datetime.UTC).strftime("%Y-%m-%dT%H:%M:%SZ")
@@ -126,6 +139,9 @@ class IODataManager:
             )
             .unique("datetime", keep="last")
             .sort("datetime")
+            .filter(
+                pl.col("datetime") >= (pl.col("datetime").max() - datetime.timedelta(months=RETENTION_PERIOD_MONTHS))
+            )
             .write_json()
         )
         JSONUtils.save_json(filepath, data)
@@ -165,6 +181,9 @@ class IODataManager:
             )
             .unique("datetime", keep="last")
             .sort("datetime")
+            .filter(
+                pl.col("datetime") >= (pl.col("datetime").max() - datetime.timedelta(months=RETENTION_PERIOD_MONTHS))
+            )
             .write_json()
         )
 
@@ -183,6 +202,9 @@ class IODataManager:
             )
             .unique("datetime", keep="last")
             .sort("datetime")
+            .filter(
+                pl.col("datetime") >= (pl.col("datetime").max() - datetime.timedelta(months=RETENTION_PERIOD_MONTHS))
+            )
             .write_json()
         )
 
